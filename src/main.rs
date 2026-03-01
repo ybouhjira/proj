@@ -3,6 +3,7 @@
 use anyhow::Result;
 use clap::Parser;
 
+mod checks;
 mod cli;
 mod commands;
 mod config;
@@ -39,8 +40,13 @@ async fn main() -> Result<()> {
         Commands::Open { name, github, dir } => {
             commands::open::execute(&name, github, dir).await?;
         }
-        Commands::Check { name, all, check } => {
-            commands::check::execute(&name, all, check).await?;
+        Commands::Check {
+            name,
+            all,
+            check,
+            ai,
+        } => {
+            commands::check::execute(&name, all, check, ai).await?;
         }
         Commands::Info { name } => {
             commands::info::execute(&name).await?;

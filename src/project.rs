@@ -65,6 +65,7 @@ pub trait QualityCheck {
 }
 
 #[allow(dead_code)]
+#[derive(Debug)]
 pub struct CheckResult {
     pub score: f32,
     pub issues: Vec<Issue>,
@@ -72,6 +73,7 @@ pub struct CheckResult {
 }
 
 #[allow(dead_code)]
+#[derive(Debug)]
 pub struct Issue {
     pub severity: Severity,
     pub message: String,
@@ -80,6 +82,7 @@ pub struct Issue {
 }
 
 #[allow(dead_code)]
+#[derive(Debug)]
 pub enum Severity {
     Error,
     Warning,

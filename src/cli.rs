@@ -76,6 +76,9 @@ pub enum Commands {
             help = "Run specific check (quality, logging, testing, security, docs)"
         )]
         check: Option<String>,
+
+        #[arg(long, help = "Use AI (Claude CLI) for deeper analysis")]
+        ai: bool,
     },
 
     #[command(about = "Show detailed project info")]
