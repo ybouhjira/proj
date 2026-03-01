@@ -1,0 +1,242 @@
+/**
+ * CSS files with the .module.css suffix will be treated as CSS modules
+ * and scoped locally.
+ */
+
+.heroBanner {
+  padding: 6rem 0 4rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(180deg, #0d1117 0%, #161b22 100%);
+}
+
+.heroTitle {
+  font-family: 'Courier New', 'Courier', monospace;
+  font-size: 4rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: #58a6ff;
+}
+
+.terminalPrompt {
+  color: #7ee787;
+  margin-right: 0.5rem;
+}
+
+.heroSubtitle {
+  font-size: 1.5rem;
+  color: #8b949e;
+  margin-bottom: 2rem;
+}
+
+@media screen and (max-width: 996px) {
+  .heroBanner {
+    padding: 3rem 1rem;
+  }
+
+  .heroTitle {
+    font-size: 2.5rem;
+  }
+
+  .heroSubtitle {
+    font-size: 1.2rem;
+  }
+}
+
+.buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 3rem;
+  flex-wrap: wrap;
+}
+
+.terminalDemo {
+  max-width: 800px;
+  margin: 0 auto;
+  background: #0d1117;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  border: 1px solid #30363d;
+}
+
+.terminalHeader {
+  background: #161b22;
+  padding: 0.75rem 1rem;
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 1px solid #30363d;
+}
+
+.terminalButton {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #30363d;
+}
+
+.terminalButton:nth-child(1) {
+  background: #ff5f56;
+}
+
+.terminalButton:nth-child(2) {
+  background: #ffbd2e;
+}
+
+.terminalButton:nth-child(3) {
+  background: #27c93f;
+}
+
+.terminalContent {
+  padding: 1.5rem;
+  text-align: left;
+  margin: 0;
+  font-family: 'Courier New', 'Courier', monospace;
+  font-size: 0.95rem;
+  line-height: 1.8;
+  color: #c9d1d9;
+  background: #0d1117;
+}
+
+.terminalContent code {
+  background: transparent;
+  padding: 0;
+  font-family: inherit;
+}
+
+.prompt {
+  color: #7ee787;
+  user-select: none;
+}
+
+.success {
+  color: #3fb950;
+}
+
+.comment {
+  color: #8b949e;
+  font-style: italic;
+}
+
+.comparison {
+  padding: 4rem 0;
+  background: #0d1117;
+}
+
+.comparison h2 {
+  text-align: center;
+  margin-bottom: 3rem;
+  color: #c9d1d9;
+  font-size: 2.5rem;
+}
+
+.comparisonTable {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  border-collapse: collapse;
+  font-size: 1rem;
+}
+
+.comparisonTable th {
+  background: #161b22;
+  color: #c9d1d9;
+  padding: 1rem;
+  text-align: left;
+  border: 1px solid #30363d;
+  font-weight: 600;
+}
+
+.comparisonTable td {
+  padding: 1rem;
+  border: 1px solid #30363d;
+  color: #8b949e;
+}
+
+.comparisonTable tbody tr:nth-child(odd) {
+  background: #0d1117;
+}
+
+.comparisonTable tbody tr:nth-child(even) {
+  background: #161b22;
+}
+
+.install {
+  padding: 4rem 0;
+  background: #161b22;
+}
+
+.install h2 {
+  text-align: center;
+  margin-bottom: 3rem;
+  color: #c9d1d9;
+  font-size: 2.5rem;
+}
+
+.installTabs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto 3rem;
+}
+
+.installTab h3 {
+  color: #58a6ff;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
+
+.installTab pre {
+  background: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  padding: 1.5rem;
+  margin: 0;
+  font-family: 'Courier New', 'Courier', monospace;
+  font-size: 0.9rem;
+  color: #c9d1d9;
+  overflow-x: auto;
+}
+
+.installTab code {
+  background: transparent;
+  padding: 0;
+  font-family: inherit;
+}
+
+.shellSetup {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  background: #0d1117;
+  border-radius: 8px;
+  border: 1px solid #30363d;
+}
+
+.shellSetup p {
+  color: #8b949e;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+
+.shellSetup pre {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  padding: 1.5rem;
+  margin: 0;
+  font-family: 'Courier New', 'Courier', monospace;
+  font-size: 0.9rem;
+  color: #c9d1d9;
+  overflow-x: auto;
+}
+
+.shellSetup code {
+  background: transparent;
+  padding: 0;
+  font-family: inherit;
+}
