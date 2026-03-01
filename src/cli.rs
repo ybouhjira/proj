@@ -26,8 +26,8 @@ pub enum Commands {
 
     #[command(about = "Print path to project for shell wrapper (use fuzzy search)")]
     Cd {
-        #[arg(help = "Project name or fuzzy query")]
-        query: String,
+        #[arg(help = "Project name or fuzzy query (omit for interactive picker)")]
+        query: Option<String>,
     },
 
     #[command(about = "Clone a GitHub repo to projects directory")]

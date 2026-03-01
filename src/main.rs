@@ -23,7 +23,7 @@ async fn main() -> Result<()> {
             commands::list::execute(remote, local, all).await?;
         }
         Commands::Cd { query } => {
-            commands::cd::execute(&query).await?;
+            commands::cd::execute(query.as_deref()).await?;
         }
         Commands::Clone { name } => {
             commands::clone::execute(&name).await?;
