@@ -1,0 +1,306 @@
+.TH YOUSSEF-TOOLS 7 "2026-03-01" "Youssef Bouhjira" "Custom Tools Reference"
+.SH NAME
+youssef-tools \- custom tools and scripts by Youssef Bouhjira
+.SH DESCRIPTION
+This manual page provides a comprehensive reference of all custom-built tools,
+CLIs, scripts, and services across Youssef's development environment. These tools
+span multiple domains including project management, GPU computing, media processing,
+AI/ML workflows, and infrastructure automation.
+.SH CLI TOOLS (RUST)
+.TP
+.B proj
+Project manager with local and GitHub synchronization, fuzzy search, and code
+quality checks. Provides seamless navigation between projects and repositories.
+.br
+.I Location:
+~/Projects/claude-project-cli
+.TP
+.B yb-global-mcp
+MCP (Model Context Protocol) server providing Claude Code with knowledge about
+available tools, repositories, and infrastructure. Enables intelligent tool discovery.
+.br
+.I Location:
+~/Projects/yb-global-mcp
+.TP
+.B app-hub
+Docker container dashboard with GPU monitoring, featuring a SolidJS frontend and
+Rust backend. Provides real-time visibility into containerized applications and
+GPU resource utilization.
+.br
+.I Location:
+~/Projects/app-hub
+.TP
+.B gpu-context-hook
+SessionStart hook that automatically injects GPU server context into Claude Code
+sessions, enabling GPU-aware task planning.
+.br
+.I Location:
+~/Projects/yb-global-mcp/hooks/gpu-context
+.TP
+.B ip-changer
+Router management utility for Huawei HG8145V5 devices. Installed globally in PATH
+for quick IP configuration changes.
+.br
+.I Location:
+~/.local/bin/ip-changer
+.SH APPLICATIONS
+.SS Desktop and Web Applications
+.TP
+.B claude-headless
+WebSocket and REST API wrapper around Claude CLI for building web-based chat UIs.
+Built with TypeScript and Effect for type-safe, composable API design.
+.br
+.I Location:
+~/Projects/claude-headless
+.br
+.I Stack:
+TypeScript, Effect
+.TP
+.B faceswap-api
+GPU-accelerated video face swapping REST API using FaceFusion. Provides high-quality
+face replacement in video streams with hardware acceleration.
+.br
+.I Location:
+~/Projects/faceswap-api
+.br
+.I Stack:
+TypeScript, FaceFusion
+.TP
+.B voiceswap-desktop
+AI voice cloning desktop application supporting RVC and Seed-VC models. Features
+a Tauri frontend with FastAPI backend for real-time voice transformation.
+.br
+.I Location:
+~/Projects/voiceswap-desktop
+.br
+.I Stack:
+Tauri, FastAPI
+.TP
+.B d3-wysiwyg
+Visual WYSIWYG editor for D3.js visualizations with node-based data flow. Enables
+non-programmers to create complex data visualizations.
+.br
+.I Location:
+~/Projects/d3-wysiwyg
+.br
+.I Stack:
+React, D3.js
+.TP
+.B solidkit
+SolidJS component library with integrated Storybook for component development and
+documentation.
+.br
+.I Location:
+~/Projects/solidkit
+.br
+.I Stack:
+SolidJS, Storybook
+.TP
+.B video-cutter
+GTK-based video cutting utility for quick video trimming and splitting.
+.br
+.I Location:
+~/Projects/video-cutter
+.br
+.I Stack:
+Python, GTK
+.TP
+.B ybreport
+Desktop reporting application built with Tauri, combining Rust performance with
+web UI flexibility.
+.br
+.I Location:
+~/Projects/ybreport
+.br
+.I Stack:
+Tauri (Rust + Web)
+.SH SHELL SCRIPTS
+The following scripts are located in
+.I ~/.claude/
+and provide automation for Claude Code workflows:
+.TP
+.B analyze-session.sh
+Analyze a specific Claude Code session, extracting metadata, tool usage, and
+conversation flow.
+.TP
+.B backup-logs.sh
+Backup Claude Code conversation logs to local storage with compression and rotation.
+.TP
+.B backup-to-gcs.sh
+Backup logs to Google Cloud Storage bucket
+.I gs://claude-code-logs-youssef-backup
+with automatic versioning.
+.TP
+.B backup-to-github.sh
+Backup logs to GitHub repositories for version control and sharing.
+.TP
+.B process-daily-logs.sh
+Process and summarize daily Claude Code logs, generating insights and statistics.
+.TP
+.B project-banner.sh
+Display styled project banner in terminal with project metadata and status.
+.TP
+.B suggest-project-emoji.sh
+AI-powered project emoji suggester based on project name and description.
+.SH SHELL INTEGRATION
+.SS Zsh Plugin
+Custom Oh My Zsh plugin located at
+.I ~/.oh-my-zsh/custom/plugins/claude/
+providing:
+.PP
+.B Aliases:
+.RS
+.TP
+.B cc
+Alias for
+.I claude
+.TP
+.B ccc
+Alias for
+.I claude chat
+.RE
+.PP
+.B Tab Completion:
+Full tab completion for all Claude Code subcommands and options.
+.SH GITHUB REPOSITORIES
+Over 200 repositories at
+.I github.com/ybouhjira
+including notable projects:
+.TP
+.B termgfx
+Terminal graphics CLI for rendering charts, images, and interactive prompts in
+the terminal. PUBLIC repository.
+.TP
+.B kats
+Knowledge And Tracking System built in Rust with adaptive learning algorithms.
+.TP
+.B vidgrab
+Browser-based video downloader CLI supporting multiple platforms.
+.TP
+.B androidlens
+Android debugging tool built with C++23 and Dear ImGui for real-time device inspection.
+.TP
+.B dlna-server
+Rust DLNA media server with GTK4 GUI for streaming media to compatible devices.
+.TP
+.B francopals
+French learning mini-games for kids with interactive exercises.
+.TP
+.B qml-test-framework
+Jest/Playwright-style testing framework for Qt QML applications.
+.SH INFRASTRUCTURE
+.SS Cloud Services
+.TS
+tab(|);
+l l l.
+Service|Purpose|Access
+_
+Google Cloud|Secrets management, cloud functions|gcloud CLI
+Project ID|exam-generator-1764422144|
+Tailscale VPN|Mesh network (MacBook, Gaming PC, Phone)|tailscale CLI
+ntfy|Phone push notifications|curl/notify script
+Topic|exam-generator-youssef-2024|
+.TE
+.SS VPN Access
+.TP
+.B Chandler VPN
+Server: uschd1.transperfect.com:4443
+.br
+Access: dev-glekgv.transperfect.com (dev environment)
+.br
+Type: Cisco AnyConnect
+.TP
+.B CTX VPN
+Server: 207.223.244.4
+.br
+Access: *.tptkgv.com (qa-gle, dev-gle)
+.br
+Type: IPSec
+.br
+Username: youssef.bouhjira
+.TP
+.B Tailscale
+Personal mesh VPN for secure device access
+.br
+Devices: MacBook (100.90.8.47), Gaming PC (100.76.24.74), Phone (100.68.78.110)
+.SH FILES
+.TP
+.I ~/.config/proj/config.toml
+Configuration file for
+.B proj
+project manager
+.TP
+.I ~/.config/proj/cache.json
+GitHub API cache for
+.B proj
+to reduce API rate limit usage
+.TP
+.I ~/.claude/
+Directory containing Claude Code scripts, configuration, and session logs
+.TP
+.I ~/.secrets
+Local API keys and credentials (not committed to version control)
+.TP
+.I ~/.oh-my-zsh/custom/plugins/claude/
+Zsh plugin for Claude Code integration
+.TP
+.I ~/Projects/
+Root directory for all development projects
+.SH ENVIRONMENT VARIABLES
+.TP
+.B SUPERVISOR_THRESHOLD
+Confidence threshold for Claude Code supervisor hook (default: 90)
+.TP
+.B SUPERVISOR_TICKET
+Ticket ID for E2E test enforcement in supervisor
+.SH EXAMPLES
+.TP
+.B View GPU server status
+.nf
+app-hub
+.fi
+.TP
+.B List all projects
+.nf
+proj list
+.fi
+.TP
+.B Backup Claude Code logs to GCS
+.nf
+~/.claude/backup-to-gcs.sh
+.fi
+.TP
+.B Connect to CTX VPN for QA access
+.nf
+scutil --nc start "CTX"
+.fi
+.TP
+.B Send notification to phone
+.nf
+curl -H "Title: Build Complete" \\
+     -d "Deployment successful" \\
+     ntfy.sh/exam-generator-youssef-2024
+.fi
+.TP
+.B Fetch TransPerfect credentials from GCP
+.nf
+gcloud secrets versions access latest \\
+  --secret=YOUSSEF_TRANSPERFECT_EMAIL \\
+  --project=exam-generator-1764422144
+.fi
+.SH SEE ALSO
+.BR proj (1),
+.BR gh (1),
+.BR claude (1),
+.BR git (1),
+.BR gcloud (1),
+.BR tailscale (1),
+.BR docker (1)
+.SH AUTHOR
+Youssef Bouhjira <github.com/ybouhjira>
+.SH NOTES
+This reference page documents tools and infrastructure as of March 2026. New tools
+may be added over time. Check individual project repositories for latest documentation.
+.PP
+Many tools are optimized for ADHD-friendly workflows with emphasis on automation,
+visual feedback, and minimal context switching.
