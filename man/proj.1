@@ -1,0 +1,504 @@
+.\" Man page for proj
+.\" To install: sudo mkdir -p /usr/local/share/man/man1 && sudo cp man/proj.1 /usr/local/share/man/man1/ && sudo mandb
+.\" To view: man proj
+.\"
+.TH PROJ 1 "2026-03-01" "proj 0.1.0" "User Commands"
+.SH NAME
+proj \- manage all your projects from the terminal
+.SH SYNOPSIS
+.B proj
+[\fB\-h\fR|\fB\-\-help\fR]
+[\fB\-V\fR|\fB\-\-version\fR]
+.I COMMAND
+[\fIOPTIONS\fR]
+.SH DESCRIPTION
+.B proj
+is a fast CLI for managing all your projects across local directories and GitHub. It provides instant project switching via fuzzy search, unified sync status tracking, quality checks, and seamless GitHub integration.
+.PP
+Key capabilities:
+.IP \(bu 2
+Instant fuzzy search navigation across all projects
+.IP \(bu 2
+Unified dashboard showing local and remote repositories
+.IP \(bu 2
+Smart sync tracking (dirty, ahead, behind, diverged)
+.IP \(bu 2
+AI-powered code quality checks
+.IP \(bu 2
+GitHub integration (clone, create, browse)
+.IP \(bu 2
+Shell integration for instant directory changes
+.IP \(bu 2
+Rich metadata (language, stars, last push time, dirty files)
+.SH COMMANDS
+.TP
+.B list, ls
+List all projects (local + remote)
+.RS
+.TP
+.B \-\-local
+Show only local projects
+.TP
+.B \-\-remote
+Show remote-only projects (on GitHub but not cloned)
+.TP
+.B \-\-all
+Show all projects (default)
+.PP
+.B Examples:
+.RS 2
+.nf
+proj ls
+proj ls --local
+proj ls --remote
+.fi
+.RE
+.RE
+.TP
+.B cd \fI[QUERY]\fR
+Print path to project for shell wrapper (uses fuzzy search)
+.RS
+.TP
+.I QUERY
+Project name or fuzzy query. If omitted, shows an interactive picker.
+.PP
+Note: This command outputs a path. The shell wrapper function (see
+.B SHELL INTEGRATION
+below) captures this and performs the actual directory change.
+.PP
+.B Examples:
+.RS 2
+.nf
+proj cd faceswap-api
+proj cd face           # Fuzzy matches faceswap-api
+proj cd                # Interactive picker
+.fi
+.RE
+.RE
+.TP
+.B clone \fINAME\fR
+Clone a GitHub repository to projects directory
+.RS
+.TP
+.I NAME
+Repository name (supports fuzzy matching against your GitHub repos)
+.PP
+The repository is cloned to
+.IR $projects_dir/<name> .
+.PP
+.B Examples:
+.RS 2
+.nf
+proj clone solidkit
+proj clone solid       # Fuzzy matches solidkit
+.fi
+.RE
+.RE
+.TP
+.B new \fINAME\fR [\fIOPTIONS\fR]
+Create new project (directory + git + GitHub repo)
+.RS
+.TP
+.I NAME
+Project name (required)
+.TP
+.B \-\-public
+Create public GitHub repository (default: private)
+.TP
+.B \-\-lang \fILANGUAGE\fR
+Language for scaffolding. Supported: rust, js, py, go
+.PP
+Creates:
+.IP \(bu 2
+Local directory in
+.I $projects_dir/<name>
+.IP \(bu 2
+Git repository (with initial commit)
+.IP \(bu 2
+GitHub repository (private by default)
+.IP \(bu 2
+Language-specific scaffolding (if --lang specified)
+.PP
+.B Examples:
+.RS 2
+.nf
+proj new my-app
+proj new my-rust-crate --lang rust
+proj new open-source-tool --public --lang js
+.fi
+.RE
+.RE
+.TP
+.B sync
+Show sync status dashboard
+.RS
+Displays:
+.IP \(bu 2
+Projects with unpushed commits (ahead)
+.IP \(bu 2
+Projects with uncommitted changes (dirty)
+.IP \(bu 2
+Projects without git tracking
+.IP \(bu 2
+Clean projects (synced)
+.PP
+.B Example:
+.RS 2
+.nf
+proj sync
+.fi
+.RE
+.RE
+.TP
+.B open \fINAME\fR [\fIOPTIONS\fR]
+Open project in editor, browser, or file manager
+.RS
+.TP
+.I NAME
+Project name (supports fuzzy matching)
+.TP
+.B \-\-github
+Open GitHub repository URL in browser
+.TP
+.B \-\-dir
+Open project directory in file manager
+.PP
+Default behavior (no flags): Opens project in your configured editor (via
+.B $EDITOR
+environment variable or config file).
+.PP
+.B Examples:
+.RS 2
+.nf
+proj open solidkit                # Opens in editor
+proj open solidkit --github       # Opens GitHub page
+proj open solidkit --dir          # Opens in file manager
+.fi
+.RE
+.RE
+.TP
+.B check \fINAME\fR [\fIOPTIONS\fR]
+Run AI-powered code quality checks
+.RS
+.TP
+.I NAME
+Project name (supports fuzzy matching)
+.TP
+.B \-\-all
+Run all available checks
+.TP
+.B \-\-check \fICHECK_TYPE\fR
+Run specific check. Available types:
+.RS 4
+.IP \(bu 2
+.B quality
+\- Code quality, complexity, patterns
+.IP \(bu 2
+.B logging
+\- Logging consistency, levels, structured logging
+.IP \(bu 2
+.B testing
+\- Test coverage, test quality, missing tests
+.IP \(bu 2
+.B security
+\- OWASP checks, dependency audit, secrets scan
+.IP \(bu 2
+.B docs
+\- Documentation completeness, API docs
+.RE
+.TP
+.B \-\-ai
+Use AI (Claude CLI) for deeper analysis
+.PP
+.B Examples:
+.RS 2
+.nf
+proj check solidkit --all
+proj check faceswap-api --check security
+proj check my-app --check quality --ai
+.fi
+.RE
+.RE
+.TP
+.B info \fINAME\fR
+Show detailed project information
+.RS
+.TP
+.I NAME
+Project name (supports fuzzy matching)
+.PP
+Displays:
+.IP \(bu 2
+Local path
+.IP \(bu 2
+GitHub repository details (description, stars, language)
+.IP \(bu 2
+Git status (branch, dirty files, last commit)
+.IP \(bu 2
+Sync status (ahead, behind, diverged)
+.IP \(bu 2
+Last push time
+.PP
+.B Example:
+.RS 2
+.nf
+proj info solidkit
+.fi
+.RE
+.RE
+.TP
+.B init \fISHELL\fR
+Output shell wrapper function for cd command
+.RS
+.TP
+.I SHELL
+Shell type: bash, zsh, or fish
+.PP
+Generates a shell function that wraps
+.B proj cd
+to enable directory changes in the parent shell. See
+.B SHELL INTEGRATION
+below for details.
+.PP
+.B Examples:
+.RS 2
+.nf
+proj init bash
+proj init zsh
+proj init fish
+
+# Typical usage (add to ~/.bashrc or ~/.zshrc):
+eval "$(proj init bash)"
+.fi
+.RE
+.RE
+.SH OPTIONS
+.TP
+.B \-h, \-\-help
+Print help information
+.TP
+.B \-V, \-\-version
+Print version information
+.SH CONFIGURATION
+.B proj
+reads configuration from
+.IR ~/.config/proj/config.toml .
+.PP
+Example configuration:
+.RS 4
+.nf
+# Directory containing local projects
+projects_dir = "~/Projects"
+
+# GitHub username for repository listing
+github_username = "yourusername"
+
+# Patterns to exclude from project discovery
+exclude_patterns = [
+    "node_modules",
+    "target",
+    ".git",
+    "vendor"
+]
+
+# Custom quality checks
+[checks]
+rust = ["cargo clippy", "cargo test"]
+typescript = ["npm run lint", "npm test"]
+python = ["ruff check", "pytest"]
+.fi
+.RE
+.PP
+All fields are optional. Defaults:
+.IP \(bu 2
+.B projects_dir
+\- ~/Projects
+.IP \(bu 2
+.B github_username
+\- Detected from git config
+.IP \(bu 2
+.B exclude_patterns
+\- node_modules, target, .git
+.SH SHELL INTEGRATION
+.B proj cd
+cannot change the parent shell's directory directly. Instead, it outputs the target path and relies on a shell wrapper function to perform the actual directory change.
+.PP
+.B Setup (automatic):
+.RS 4
+.nf
+# Add to ~/.bashrc or ~/.zshrc
+eval "$(proj init bash)"   # or: zsh, fish
+.fi
+.RE
+.PP
+.B Setup (manual):
+.PP
+If automatic setup doesn't work, add this function to
+.I ~/.bashrc
+or
+.IR ~/.zshrc :
+.RS 4
+.nf
+proj() {
+    if [ "$1" = "cd" ]; then
+        local result=$(command proj cd "$2")
+        if [ -d "$result" ]; then
+            cd "$result"
+        else
+            echo "$result"
+        fi
+    else
+        command proj "$@"
+    fi
+}
+.fi
+.RE
+.PP
+For Fish shell, add to
+.IR ~/.config/fish/config.fish :
+.RS 4
+.nf
+function proj
+    if test "$argv[1]" = "cd"
+        set -l dir (command proj cd $argv[2])
+        if test -d "$dir"
+            cd "$dir"
+        else
+            echo "$dir"
+        end
+    else
+        command proj $argv
+    end
+end
+.fi
+.RE
+.PP
+.B How it works:
+.IP 1. 3
+User runs
+.B proj cd <query>
+.IP 2. 3
+Shell wrapper intercepts the command
+.IP 3. 3
+Wrapper calls
+.B command proj cd <query>
+to get the path
+.IP 4. 3
+Wrapper uses built-in
+.B cd
+to change directory
+.SH ENVIRONMENT
+.TP
+.B EDITOR
+Default editor for
+.BR "proj open" .
+If not set, falls back to config file or
+.BR vi .
+.TP
+.B GITHUB_TOKEN
+GitHub personal access token. If not set,
+.B proj
+uses
+.B gh
+CLI's authentication (recommended).
+.SH FILES
+.TP
+.I ~/.config/proj/config.toml
+User configuration file
+.TP
+.I ~/Projects/
+Default projects directory (configurable)
+.TP
+.I ~/.bashrc, ~/.zshrc
+Shell initialization files where
+.B proj init
+output should be added
+.SH EXAMPLES
+.SS List all local projects
+.RS 4
+.nf
+proj ls --local
+.fi
+.RE
+.SS Jump to a project using fuzzy search
+.RS 4
+.nf
+proj cd face              # Matches 'faceswap-api'
+proj cd solid             # Matches 'solidkit'
+proj cd                   # Interactive picker
+.fi
+.RE
+.SS Clone a repository from GitHub
+.RS 4
+.nf
+proj clone my-repo
+proj clone my-org/my-repo
+.fi
+.RE
+.SS Create a new Rust project
+.RS 4
+.nf
+proj new my-crate --lang rust
+.fi
+.RE
+.SS Create a public JavaScript project
+.RS 4
+.nf
+proj new open-source-lib --lang js --public
+.fi
+.RE
+.SS Check which projects need attention
+.RS 4
+.nf
+proj sync
+.fi
+.RE
+.SS Open a project in your editor
+.RS 4
+.nf
+proj open faceswap-api
+.fi
+.RE
+.SS Open a project's GitHub page
+.RS 4
+.nf
+proj open solidkit --github
+.fi
+.RE
+.SS Run security checks on a project
+.RS 4
+.nf
+proj check my-app --check security
+.fi
+.RE
+.SS Run all quality checks with AI analysis
+.RS 4
+.nf
+proj check my-app --all --ai
+.fi
+.RE
+.SS View detailed project information
+.RS 4
+.nf
+proj info solidkit
+.fi
+.RE
+.SH EXIT STATUS
+.TP
+.B 0
+Success
+.TP
+.B 1
+Error (invalid arguments, project not found, git/GitHub operation failed)
+.SH SEE ALSO
+.BR gh (1),
+.BR git (1),
+.BR fzf (1)
+.PP
+GitHub repository:
+.I https://github.com/ybouhjira/proj
+.SH AUTHORS
+Youssef Bouhjira
+.SH BUGS
+Report bugs at:
+.I https://github.com/ybouhjira/proj/issues
