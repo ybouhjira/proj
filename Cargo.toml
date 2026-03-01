@@ -1,0 +1,30 @@
+[package]
+name = "proj"
+version = "0.1.0"
+edition = "2021"
+description = "Fast CLI for managing all your projects — local + GitHub sync, fuzzy search, code quality checks"
+license = "MIT"
+repository = "https://github.com/ybouhjira/proj"
+keywords = ["cli", "git", "github", "project-management", "developer-tools"]
+categories = ["command-line-utilities", "development-tools"]
+
+[dependencies]
+clap = { version = "4", features = ["derive", "env"] }
+tokio = { version = "1", features = ["full"] }
+serde = { version = "1", features = ["derive"] }
+toml = "0.8"
+tabled = "0.17"
+console = "0.15"
+indicatif = "0.17"
+nucleo-matcher = "0.3"
+chrono = { version = "0.4", features = ["serde"] }
+dirs = "6"
+anyhow = "1"
+which = "7"
+serde_json = "1"
+shellexpand = "3"
+
+[profile.release]
+lto = true
+codegen-units = 1
+strip = true
