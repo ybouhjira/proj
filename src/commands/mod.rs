@@ -1,6 +1,7 @@
 pub mod cd;
 pub mod check;
 pub mod clone;
+pub mod completions;
 pub mod info;
 pub mod init;
 pub mod list;

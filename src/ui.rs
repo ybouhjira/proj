@@ -8,17 +8,27 @@ use tabled::{
 
 use crate::project::{Project, SyncStatus};
 
-pub fn print_project_table(projects: &[Project], show_remote: bool) {
+pub fn print_project_table(projects: &[Project], show_remote: bool, cache_status: Option<&str>) {
     let local_count = projects.iter().filter(|p| p.local_path.is_some()).count();
     let remote_count = projects.iter().filter(|p| p.github_repo.is_some()).count();
 
     println!();
-    println!(
-        "  {} Projects ({} local · {} remote)",
-        style("📦").bold(),
-        style(local_count).cyan(),
-        style(remote_count).dim()
-    );
+    if let Some(status) = cache_status {
+        println!(
+            "  {} Projects ({} local · {} remote) · {}",
+            style("📦").bold(),
+            style(local_count).cyan(),
+            style(remote_count).dim(),
+            style(format!("cached {}", status)).dim()
+        );
+    } else {
+        println!(
+            "  {} Projects ({} local · {} remote)",
+            style("📦").bold(),
+            style(local_count).cyan(),
+            style(remote_count).dim()
+        );
+    }
     println!();
 
     let visible_projects: Vec<&Project> = if show_remote {

@@ -4,6 +4,7 @@ use std::collections::HashMap;
 use std::path::Path;
 use tokio::process::Command;
 
+use crate::cache;
 use crate::config::Config;
 use crate::github;
 use crate::project::{GitStatus, Project, SyncStatus};
@@ -49,7 +50,20 @@ pub async fn discover_local(projects_dir: &Path) -> Result<Vec<Project>> {
 }
 
 pub async fn discover_remote(config: &Config) -> Result<Vec<Project>> {
-    let repos = github::list_repos(&config.github_user).await?;
+    // Try to get cached repos first
+    let repos = if let Some(cached) = cache::get_cached_repos() {
+        cached
+    } else {
+        // Cache miss - fetch from GitHub API
+        let repos = github::list_repos(&config.github_user).await?;
+
+        // Save to cache
+        if let Err(e) = cache::save_cache(&repos) {
+            eprintln!("Warning: Failed to save cache: {}", e);
+        }
+
+        repos
+    };
 
     Ok(repos
         .into_iter()

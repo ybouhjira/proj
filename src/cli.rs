@@ -22,6 +22,16 @@ pub enum Commands {
 
         #[arg(long, help = "Show all projects (local + remote)")]
         all: bool,
+
+        #[arg(
+            long,
+            help = "Sort by: name, push, dirty, status",
+            default_value = "name"
+        )]
+        sort: String,
+
+        #[arg(long, help = "Force refresh GitHub cache")]
+        refresh: bool,
     },
 
     #[command(about = "Print path to project for shell wrapper (use fuzzy search)")]
@@ -90,6 +100,12 @@ pub enum Commands {
     #[command(about = "Output shell wrapper function for cd command")]
     Init {
         #[arg(help = "Shell type (bash, zsh, fish)")]
+        shell: String,
+    },
+
+    #[command(about = "Generate shell completions")]
+    Completions {
+        #[arg(help = "Shell type (bash, zsh, fish, powershell)")]
         shell: String,
     },
 }

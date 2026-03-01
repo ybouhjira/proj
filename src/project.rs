@@ -1,4 +1,5 @@
 use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::path::PathBuf;
 
@@ -11,7 +12,7 @@ pub struct Project {
     pub git_status: Option<GitStatus>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct GitHubRepo {
     pub full_name: String,
     pub description: Option<String>,

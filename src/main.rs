@@ -3,6 +3,7 @@
 use anyhow::Result;
 use clap::Parser;
 
+mod cache;
 mod checks;
 mod cli;
 mod commands;
@@ -22,8 +23,14 @@ async fn main() -> Result<()> {
     let cli = Cli::parse();
 
     match cli.command {
-        Commands::List { remote, local, all } => {
-            commands::list::execute(remote, local, all).await?;
+        Commands::List {
+            remote,
+            local,
+            all,
+            sort,
+            refresh,
+        } => {
+            commands::list::execute(remote, local, all, &sort, refresh).await?;
         }
         Commands::Cd { query } => {
             commands::cd::execute(query.as_deref()).await?;
@@ -53,6 +60,9 @@ async fn main() -> Result<()> {
         }
         Commands::Init { shell } => {
             commands::init::execute(&shell).await?;
+        }
+        Commands::Completions { shell } => {
+            commands::completions::execute(&shell).await?;
         }
     }
 
