@@ -14,10 +14,13 @@ pub async fn execute(name: &str, public: bool, lang: Option<String>) -> Result<(
         anyhow::bail!("Directory {} already exists", project_path.display());
     }
 
-    println!("{} Creating project '{}'...", style("→").cyan(), style(name).bold());
+    println!(
+        "{} Creating project '{}'...",
+        style("→").cyan(),
+        style(name).bold()
+    );
 
-    std::fs::create_dir_all(&project_path)
-        .context("Failed to create project directory")?;
+    std::fs::create_dir_all(&project_path).context("Failed to create project directory")?;
 
     println!("  {} Created directory", style("✓").green());
 
@@ -36,15 +39,21 @@ pub async fn execute(name: &str, public: bool, lang: Option<String>) -> Result<(
 
     if let Some(language) = lang {
         create_gitignore(&project_path, &language)?;
-        println!("  {} Created .gitignore for {}", style("✓").green(), language);
+        println!(
+            "  {} Created .gitignore for {}",
+            style("✓").green(),
+            language
+        );
     }
 
     println!("  {} Creating GitHub repository...", style("→").cyan());
 
-    github::create_repo(name, !public).await
+    github::create_repo(name, !public)
+        .await
         .context("Failed to create GitHub repository")?;
 
-    println!("  {} Created GitHub repository ({})",
+    println!(
+        "  {} Created GitHub repository ({})",
         style("✓").green(),
         if public { "public" } else { "private" }
     );
@@ -58,13 +67,17 @@ pub async fn execute(name: &str, public: bool, lang: Option<String>) -> Result<(
         .context("Failed to add git remote")?;
 
     if !add_remote.status.success() {
-        eprintln!("  {} Warning: Could not add git remote", style("⚠").yellow());
+        eprintln!(
+            "  {} Warning: Could not add git remote",
+            style("⚠").yellow()
+        );
     } else {
         println!("  {} Added git remote", style("✓").green());
     }
 
     println!();
-    println!("{} Project '{}' created at {}",
+    println!(
+        "{} Project '{}' created at {}",
         style("✓").green().bold(),
         style(name).bold(),
         style(project_path.display()).cyan()

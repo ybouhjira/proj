@@ -22,12 +22,17 @@ pub async fn execute(name: &str) -> Result<()> {
     }
 
     let project_name = &matches[0].0;
-    let project = projects.iter()
+    let project = projects
+        .iter()
         .find(|p| &p.name == project_name)
         .context("Project not found")?;
 
     println!();
-    println!("  {} {}", style("📦").bold(), style(&project.name).bold().cyan());
+    println!(
+        "  {} {}",
+        style("📦").bold(),
+        style(&project.name).bold().cyan()
+    );
     println!();
 
     if let Some(ref path) = project.local_path {
@@ -36,14 +41,20 @@ pub async fn execute(name: &str) -> Result<()> {
 
     if let Some(ref git_status) = project.git_status {
         println!("  {} {}", style("Branch:").bold(), git_status.branch);
-        println!("  {} {}", style("Dirty files:").bold(),
+        println!(
+            "  {} {}",
+            style("Dirty files:").bold(),
             if git_status.dirty_files > 0 {
                 style(git_status.dirty_files).yellow().to_string()
             } else {
                 style("0").green().to_string()
             }
         );
-        println!("  {} {}", style("Last commit:").bold(), git_status.last_commit_msg);
+        println!(
+            "  {} {}",
+            style("Last commit:").bold(),
+            git_status.last_commit_msg
+        );
     }
 
     if let Some(ref repo) = project.github_repo {
@@ -57,14 +68,18 @@ pub async fn execute(name: &str) -> Result<()> {
             println!("  {} {}", style("Language:").bold(), lang);
         }
         println!("  {} {}", style("Stars:").bold(), repo.stars);
-        println!("  {} {}", style("Private:").bold(),
+        println!(
+            "  {} {}",
+            style("Private:").bold(),
             if repo.is_private {
                 style("yes").yellow()
             } else {
                 style("no").green()
             }
         );
-        println!("  {} {}", style("Last push:").bold(),
+        println!(
+            "  {} {}",
+            style("Last push:").bold(),
             ui::format_relative_time(&repo.pushed_at)
         );
     }

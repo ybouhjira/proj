@@ -1,7 +1,7 @@
+#![allow(dead_code)]
+
 use anyhow::Result;
 use clap::Parser;
-
-#![allow(dead_code)]
 
 mod cli;
 mod commands;

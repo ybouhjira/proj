@@ -13,7 +13,8 @@ pub fn print_project_table(projects: &[Project], show_remote: bool) {
     let remote_count = projects.iter().filter(|p| p.github_repo.is_some()).count();
 
     println!();
-    println!("  {} Projects ({} local · {} remote)",
+    println!(
+        "  {} Projects ({} local · {} remote)",
         style("📦").bold(),
         style(local_count).cyan(),
         style(remote_count).dim()
@@ -51,7 +52,9 @@ pub fn print_project_table(projects: &[Project], show_remote: bool) {
 
         let dirty = if let Some(ref git_status) = project.git_status {
             if git_status.dirty_files > 0 {
-                style(format!("{}∆", git_status.dirty_files)).yellow().to_string()
+                style(format!("{}∆", git_status.dirty_files))
+                    .yellow()
+                    .to_string()
             } else {
                 style("0∆").dim().to_string()
             }
@@ -75,10 +78,14 @@ pub fn print_project_table(projects: &[Project], show_remote: bool) {
 
     println!("{}", table);
 
-    let remote_only_count = projects.iter().filter(|p| p.sync_status == SyncStatus::RemoteOnly).count();
+    let remote_only_count = projects
+        .iter()
+        .filter(|p| p.sync_status == SyncStatus::RemoteOnly)
+        .count();
     if remote_only_count > 0 && !show_remote {
         println!();
-        println!("  {} Remote only ({}): {} to see all",
+        println!(
+            "  {} Remote only ({}): {} to see all",
             style("☁️").dim(),
             style(remote_only_count).dim(),
             style("proj ls --remote").cyan()
@@ -105,7 +112,11 @@ pub fn print_sync_dashboard(projects: &[Project]) {
             SyncStatus::Diverged => groups.entry("⚠ Diverged").or_default().push(project),
             SyncStatus::NoGit => groups.entry("💻 No git").or_default().push(project),
             SyncStatus::Synced => {
-                if project.git_status.as_ref().map_or(false, |s| s.dirty_files > 0) {
+                if project
+                    .git_status
+                    .as_ref()
+                    .is_some_and(|s| s.dirty_files > 0)
+                {
                     groups.entry("⚠ Dirty").or_default().push(project);
                 } else {
                     groups.entry("✅ Clean").or_default().push(project);
@@ -115,19 +126,31 @@ pub fn print_sync_dashboard(projects: &[Project]) {
         }
     }
 
-    let order = ["⬆ Need push", "⬇ Need pull", "⚠ Diverged", "⚠ Dirty", "💻 No git", "✅ Clean"];
+    let order = [
+        "⬆ Need push",
+        "⬇ Need pull",
+        "⚠ Diverged",
+        "⚠ Dirty",
+        "💻 No git",
+        "✅ Clean",
+    ];
 
     for category in order {
         if let Some(projects) = groups.get(category) {
             println!("  {} ({}):", style(category).bold(), projects.len());
             for project in projects.iter().take(10) {
                 let detail = match &project.sync_status {
-                    SyncStatus::LocalAhead(n) => format!("  +{} commit{}", n, if *n > 1 { "s" } else { "" }),
-                    SyncStatus::RemoteBehind(n) => format!("  -{} commit{}", n, if *n > 1 { "s" } else { "" }),
+                    SyncStatus::LocalAhead(n) => {
+                        format!("  +{} commit{}", n, if *n > 1 { "s" } else { "" })
+                    }
+                    SyncStatus::RemoteBehind(n) => {
+                        format!("  -{} commit{}", n, if *n > 1 { "s" } else { "" })
+                    }
                     _ => {
                         if let Some(ref git_status) = project.git_status {
                             if git_status.dirty_files > 0 {
-                                format!("  {} file{}",
+                                format!(
+                                    "  {} file{}",
                                     git_status.dirty_files,
                                     if git_status.dirty_files > 1 { "s" } else { "" }
                                 )
@@ -140,11 +163,14 @@ pub fn print_sync_dashboard(projects: &[Project]) {
                     }
                 };
 
-                let branch = project.git_status.as_ref()
+                let branch = project
+                    .git_status
+                    .as_ref()
                     .map(|s| format!(" {}", style(&s.branch).dim()))
                     .unwrap_or_default();
 
-                println!("    {}{}{}",
+                println!(
+                    "    {}{}{}",
                     style(&project.name).cyan(),
                     branch,
                     style(detail).yellow()
@@ -152,7 +178,8 @@ pub fn print_sync_dashboard(projects: &[Project]) {
             }
 
             if projects.len() > 10 {
-                println!("    {} ... and {} more",
+                println!(
+                    "    {} ... and {} more",
                     style("").dim(),
                     style(projects.len() - 10).dim()
                 );
@@ -175,17 +202,29 @@ pub fn format_relative_time(dt: &DateTime<Utc>) -> String {
     if diff.num_seconds() < 60 {
         style_time.apply_to("just now").to_string()
     } else if diff.num_minutes() < 60 {
-        style_time.apply_to(format!("{}m ago", diff.num_minutes())).to_string()
+        style_time
+            .apply_to(format!("{}m ago", diff.num_minutes()))
+            .to_string()
     } else if diff.num_hours() < 24 {
-        style_time.apply_to(format!("{}h ago", diff.num_hours())).to_string()
+        style_time
+            .apply_to(format!("{}h ago", diff.num_hours()))
+            .to_string()
     } else if diff.num_days() < 7 {
-        style_time.apply_to(format!("{}d ago", diff.num_days())).to_string()
+        style_time
+            .apply_to(format!("{}d ago", diff.num_days()))
+            .to_string()
     } else if diff.num_weeks() < 4 {
-        style_time.apply_to(format!("{}w ago", diff.num_weeks())).to_string()
+        style_time
+            .apply_to(format!("{}w ago", diff.num_weeks()))
+            .to_string()
     } else if diff.num_days() < 365 {
-        style_time.apply_to(format!("{}mo ago", diff.num_days() / 30)).to_string()
+        style_time
+            .apply_to(format!("{}mo ago", diff.num_days() / 30))
+            .to_string()
     } else {
-        style_time.apply_to(format!("{}y ago", diff.num_days() / 365)).to_string()
+        style_time
+            .apply_to(format!("{}y ago", diff.num_days() / 365))
+            .to_string()
     }
 }
 

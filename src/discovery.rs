@@ -51,16 +51,24 @@ pub async fn discover_local(projects_dir: &Path) -> Result<Vec<Project>> {
 pub async fn discover_remote(config: &Config) -> Result<Vec<Project>> {
     let repos = github::list_repos(&config.github_user).await?;
 
-    Ok(repos.into_iter().map(|repo| {
-        let name = repo.full_name.split('/').last().unwrap_or(&repo.full_name).to_string();
-        Project {
-            name,
-            local_path: None,
-            github_repo: Some(repo),
-            sync_status: SyncStatus::RemoteOnly,
-            git_status: None,
-        }
-    }).collect())
+    Ok(repos
+        .into_iter()
+        .map(|repo| {
+            let name = repo
+                .full_name
+                .split('/')
+                .next_back()
+                .unwrap_or(&repo.full_name)
+                .to_string();
+            Project {
+                name,
+                local_path: None,
+                github_repo: Some(repo),
+                sync_status: SyncStatus::RemoteOnly,
+                git_status: None,
+            }
+        })
+        .collect())
 }
 
 pub async fn merge_projects(local: Vec<Project>, remote: Vec<Project>) -> Vec<Project> {
@@ -69,7 +77,8 @@ pub async fn merge_projects(local: Vec<Project>, remote: Vec<Project>) -> Vec<Pr
     for mut project in local {
         if let Some(ref git_status) = project.git_status {
             if let Some(local_path) = &project.local_path {
-                project.sync_status = determine_sync_status(local_path, git_status).await
+                project.sync_status = determine_sync_status(local_path, git_status)
+                    .await
                     .unwrap_or(SyncStatus::LocalOnly);
             }
         }
@@ -81,8 +90,10 @@ pub async fn merge_projects(local: Vec<Project>, remote: Vec<Project>) -> Vec<Pr
             local_project.github_repo = remote_project.github_repo;
             if local_project.sync_status == SyncStatus::LocalOnly {
                 if let (Some(ref local_path), Some(ref git_status)) =
-                    (&local_project.local_path, &local_project.git_status) {
-                    local_project.sync_status = determine_sync_status(local_path, git_status).await
+                    (&local_project.local_path, &local_project.git_status)
+                {
+                    local_project.sync_status = determine_sync_status(local_path, git_status)
+                        .await
                         .unwrap_or(SyncStatus::LocalOnly);
                 }
             }
@@ -103,7 +114,9 @@ async fn get_git_status(path: &Path) -> Result<GitStatus> {
         .output()
         .await?;
 
-    let branch = String::from_utf8_lossy(&branch_output.stdout).trim().to_string();
+    let branch = String::from_utf8_lossy(&branch_output.stdout)
+        .trim()
+        .to_string();
 
     let status_output = Command::new("git")
         .args(["status", "--porcelain"])
@@ -124,12 +137,15 @@ async fn get_git_status(path: &Path) -> Result<GitStatus> {
     let log_output_str = String::from_utf8_lossy(&log_output.stdout);
     let log_lines: Vec<&str> = log_output_str.lines().collect();
 
-    let last_commit_msg = log_lines.first()
+    let last_commit_msg = log_lines
+        .first()
         .map(|s| s.to_string())
         .unwrap_or_else(|| "No commits".to_string());
 
     let last_commit_date = if log_lines.len() > 1 {
-        log_lines[1].parse::<i64>().ok()
+        log_lines[1]
+            .parse::<i64>()
+            .ok()
             .and_then(|ts| DateTime::from_timestamp(ts, 0))
             .unwrap_or_else(Utc::now)
     } else {
@@ -174,7 +190,7 @@ async fn determine_sync_status(path: &Path, _git_status: &GitStatus) -> Result<S
     if let Ok(output) = rev_list_output {
         if output.status.success() {
             let counts = String::from_utf8_lossy(&output.stdout);
-            let parts: Vec<&str> = counts.trim().split_whitespace().collect();
+            let parts: Vec<&str> = counts.split_whitespace().collect();
 
             if parts.len() == 2 {
                 let ahead: u32 = parts[0].parse().unwrap_or(0);

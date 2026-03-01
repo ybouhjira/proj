@@ -59,21 +59,25 @@ pub async fn list_repos(username: &str) -> Result<Vec<GitHubRepo>> {
         anyhow::bail!("gh CLI error: {}", stderr);
     }
 
-    let gh_repos: Vec<GhRepo> = serde_json::from_slice(&output.stdout)
-        .context("Failed to parse gh output")?;
+    let gh_repos: Vec<GhRepo> =
+        serde_json::from_slice(&output.stdout).context("Failed to parse gh output")?;
 
-    Ok(gh_repos.into_iter().map(|r| GitHubRepo {
-        full_name: r.full_name,
-        description: r.description,
-        is_private: r.is_private,
-        default_branch: r.default_branch_ref
-            .map(|b| b.name)
-            .unwrap_or_else(|| "main".to_string()),
-        pushed_at: r.pushed_at,
-        language: r.primary_language.map(|l| l.name),
-        stars: r.stargazer_count,
-        url: r.url,
-    }).collect())
+    Ok(gh_repos
+        .into_iter()
+        .map(|r| GitHubRepo {
+            full_name: r.full_name,
+            description: r.description,
+            is_private: r.is_private,
+            default_branch: r
+                .default_branch_ref
+                .map(|b| b.name)
+                .unwrap_or_else(|| "main".to_string()),
+            pushed_at: r.pushed_at,
+            language: r.primary_language.map(|l| l.name),
+            stars: r.stargazer_count,
+            url: r.url,
+        })
+        .collect())
 }
 
 pub async fn create_repo(name: &str, private: bool) -> Result<()> {
@@ -117,14 +121,15 @@ pub async fn repo_info(name: &str) -> Result<GitHubRepo> {
         anyhow::bail!("Failed to get repo info: {}", stderr);
     }
 
-    let gh_repo: GhRepo = serde_json::from_slice(&output.stdout)
-        .context("Failed to parse repo info")?;
+    let gh_repo: GhRepo =
+        serde_json::from_slice(&output.stdout).context("Failed to parse repo info")?;
 
     Ok(GitHubRepo {
         full_name: gh_repo.full_name,
         description: gh_repo.description,
         is_private: gh_repo.is_private,
-        default_branch: gh_repo.default_branch_ref
+        default_branch: gh_repo
+            .default_branch_ref
             .map(|b| b.name)
             .unwrap_or_else(|| "main".to_string()),
         pushed_at: gh_repo.pushed_at,

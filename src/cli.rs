@@ -71,7 +71,10 @@ pub enum Commands {
         #[arg(long, help = "Run all checks")]
         all: bool,
 
-        #[arg(long, help = "Run specific check (quality, logging, testing, security, docs)")]
+        #[arg(
+            long,
+            help = "Run specific check (quality, logging, testing, security, docs)"
+        )]
         check: Option<String>,
     },
 

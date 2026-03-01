@@ -1,6 +1,6 @@
 use anyhow::{Context, Result};
 use console::style;
-use dialoguer::{Select, theme::ColorfulTheme};
+use dialoguer::{theme::ColorfulTheme, Select};
 
 use crate::config::Config;
 use crate::discovery;
@@ -32,7 +32,8 @@ pub async fn execute(query: Option<&str>) -> Result<()> {
 
         if let Some(index) = selection {
             let project_name = &local_names[index];
-            let project = projects.iter()
+            let project = projects
+                .iter()
                 .find(|p| &p.name == project_name)
                 .context("Project not found")?;
 
@@ -57,7 +58,8 @@ pub async fn execute(query: Option<&str>) -> Result<()> {
     // If exact match or clear winner, use it
     if matches.len() == 1 || (matches.len() > 1 && matches[0].1 > matches[1].1 * 2) {
         let project_name = &matches[0].0;
-        let project = projects.iter()
+        let project = projects
+            .iter()
             .find(|p| &p.name == project_name)
             .context("Project not found")?;
 
@@ -78,7 +80,8 @@ pub async fn execute(query: Option<&str>) -> Result<()> {
 
     if let Some(index) = selection {
         let project_name = &match_names[index];
-        let project = projects.iter()
+        let project = projects
+            .iter()
             .find(|p| &p.name == project_name)
             .context("Project not found")?;
 

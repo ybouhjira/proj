@@ -22,13 +22,15 @@ pub async fn execute(name: &str, github: bool, dir: bool) -> Result<()> {
     }
 
     let project_name = &matches[0].0;
-    let project = projects.iter()
+    let project = projects
+        .iter()
         .find(|p| &p.name == project_name)
         .context("Project not found")?;
 
     if github {
         if let Some(ref repo) = project.github_repo {
-            println!("{} Opening {} in browser...",
+            println!(
+                "{} Opening {} in browser...",
                 style("→").cyan(),
                 style(&repo.url).dim()
             );
@@ -67,7 +69,8 @@ pub async fn execute(name: &str, github: bool, dir: bool) -> Result<()> {
                 .spawn()
                 .context("Failed to open file manager")?;
 
-            println!("{} Opened {} in file manager",
+            println!(
+                "{} Opened {} in file manager",
                 style("✓").green(),
                 style(path.display()).cyan()
             );
@@ -79,7 +82,8 @@ pub async fn execute(name: &str, github: bool, dir: bool) -> Result<()> {
     }
 
     if let Some(ref path) = project.local_path {
-        println!("{} Opening {} in {}...",
+        println!(
+            "{} Opening {} in {}...",
             style("→").cyan(),
             style(project_name).bold(),
             style(&config.editor).dim()
@@ -92,7 +96,10 @@ pub async fn execute(name: &str, github: bool, dir: bool) -> Result<()> {
 
         Ok(())
     } else {
-        anyhow::bail!("Project '{}' is not cloned locally. Use 'proj clone {}' first.",
-            project_name, project_name);
+        anyhow::bail!(
+            "Project '{}' is not cloned locally. Use 'proj clone {}' first.",
+            project_name,
+            project_name
+        );
     }
 }

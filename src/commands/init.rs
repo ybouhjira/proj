@@ -3,7 +3,8 @@ use anyhow::Result;
 pub async fn execute(shell: &str) -> Result<()> {
     match shell {
         "bash" | "zsh" => {
-            println!(r#"# Add this to your ~/.bashrc or ~/.zshrc:
+            println!(
+                r#"# Add this to your ~/.bashrc or ~/.zshrc:
 
 proj() {{
     if [ "$1" = "cd" ]; then
@@ -16,10 +17,12 @@ proj() {{
         command proj "$@"
     fi
 }}
-"#);
+"#
+            );
         }
         "fish" => {
-            println!(r#"# Add this to your ~/.config/fish/config.fish:
+            println!(
+                r#"# Add this to your ~/.config/fish/config.fish:
 
 function proj
     if test "$argv[1]" = "cd"
@@ -32,7 +35,8 @@ function proj
         command proj $argv
     end
 end
-"#);
+"#
+            );
         }
         _ => {
             anyhow::bail!("Unsupported shell: {}. Use bash, zsh, or fish.", shell);

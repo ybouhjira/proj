@@ -15,37 +15,42 @@ pub async fn execute(name: &str) -> Result<()> {
     spinner.set_style(
         ProgressStyle::default_spinner()
             .template("{spinner:.cyan} {msg}")
-            .unwrap()
+            .unwrap(),
     );
     spinner.set_message("Fetching remote repositories...");
     spinner.enable_steady_tick(std::time::Duration::from_millis(100));
 
     let remote_projects = discovery::discover_remote(&config).await?;
 
-    let repo_names: Vec<String> = remote_projects
-        .iter()
-        .map(|p| p.name.clone())
-        .collect();
+    let repo_names: Vec<String> = remote_projects.iter().map(|p| p.name.clone()).collect();
 
     let matches = fuzzy::fuzzy_match(name, &repo_names);
 
     if matches.is_empty() {
         spinner.finish_and_clear();
-        eprintln!("{} No remote repositories match '{}'", style("✗").red(), name);
+        eprintln!(
+            "{} No remote repositories match '{}'",
+            style("✗").red(),
+            name
+        );
         std::process::exit(1);
     }
 
     let repo_name = &matches[0].0;
-    let project = remote_projects.iter()
+    let project = remote_projects
+        .iter()
         .find(|p| &p.name == repo_name)
         .context("Repository not found")?;
 
-    let github_repo = project.github_repo.as_ref()
+    let github_repo = project
+        .github_repo
+        .as_ref()
         .context("No GitHub repository info")?;
 
     spinner.finish_and_clear();
 
-    println!("{} Cloning {} to {}...",
+    println!(
+        "{} Cloning {} to {}...",
         style("→").cyan(),
         style(&github_repo.full_name).bold(),
         style(projects_dir.display()).dim()
@@ -66,7 +71,8 @@ pub async fn execute(name: &str) -> Result<()> {
         anyhow::bail!("Clone failed: {}", stderr);
     }
 
-    println!("{} Cloned to {}",
+    println!(
+        "{} Cloned to {}",
         style("✓").green().bold(),
         style(clone_path.display()).cyan()
     );
