@@ -297,6 +297,9 @@ show_private = true
 [checks]
 provider = "claude"
 checks = ["quality", "logging", "testing", "security"]
+
+[claude]
+default_args = ["--dangerously-skip-permissions", "--model=opus"]
 .fi
 .RE
 .PP
@@ -310,6 +313,9 @@ All fields are optional. Defaults:
 .IP \(bu 2
 .B show_private
 \- true
+.IP \(bu 2
+.B claude.default_args
+\- Arguments passed to claude CLI on launch (default: none)
 .SH SHELL INTEGRATION
 .B proj cd
 cannot change the parent shell's directory directly. Instead, it outputs the target path and relies on a shell wrapper function to perform the actual directory change.

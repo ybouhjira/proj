@@ -469,6 +469,10 @@ cache_ttl = 300
 rust = ["cargo clippy", "cargo test"]
 typescript = ["npm run lint", "npm test"]
 python = ["ruff check", "pytest"]
+
+# Claude Code integration
+[claude]
+default_args = ["--dangerously-skip-permissions", "--model=opus"]
 ```
 
 ### Environment Variables

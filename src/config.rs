@@ -23,7 +23,7 @@ pub struct ChecksConfig {
 
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
 pub struct ClaudeConfig {
-    /// Default arguments passed to claude CLI (e.g. ["--danger", "--model=opus"])
+    /// Default arguments passed to claude CLI (e.g. ["--dangerously-skip-permissions", "--model=opus"])
     #[serde(default)]
     pub default_args: Vec<String>,
 }
@@ -178,14 +178,14 @@ mod tests {
     fn test_claude_config_with_args() {
         let config = Config {
             claude: ClaudeConfig {
-                default_args: vec!["--danger".to_string(), "--model=opus".to_string()],
+                default_args: vec!["--dangerously-skip-permissions".to_string(), "--model=opus".to_string()],
             },
             ..Config::default()
         };
         let toml_str = toml::to_string_pretty(&config).unwrap();
         let parsed: Config = toml::from_str(&toml_str).unwrap();
         assert_eq!(parsed.claude.default_args.len(), 2);
-        assert_eq!(parsed.claude.default_args[0], "--danger");
+        assert_eq!(parsed.claude.default_args[0], "--dangerously-skip-permissions");
         assert_eq!(parsed.claude.default_args[1], "--model=opus");
     }
 

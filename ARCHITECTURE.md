@@ -100,6 +100,10 @@ show_private = true
 [checks]
 provider = "claude"     # claude | openai | local
 checks = ["quality", "logging", "testing", "security"]
+
+# Claude Code integration
+[claude]
+default_args = ["--dangerously-skip-permissions", "--model=opus"]
 ```
 
 Note: `proj` is optimized for Claude Code and will launch it by default via `proj open`. The `editor` config field is no longer used.
