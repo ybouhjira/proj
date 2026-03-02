@@ -143,3 +143,176 @@ fn search_in_dir<'a>(
         false
     })
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::checks::detector::{ProjectInfo, ProjectLang};
+    use tempfile::tempdir;
+    use tokio::fs;
+
+    #[tokio::test]
+    async fn test_check_logging_rust_with_tracing() {
+        let temp = tempdir().unwrap();
+        let src_dir = temp.path().join("src");
+        fs::create_dir(&src_dir).await.unwrap();
+        let main_rs = src_dir.join("main.rs");
+        fs::write(&main_rs, "use tracing::info;\nfn main() { info!(\"test\"); }").await.unwrap();
+
+        let info = ProjectInfo {
+            lang: ProjectLang::Rust,
+            has_tests: false,
+            has_linter: false,
+            has_formatter: false,
+            has_logging: false,
+            has_readme: false,
+            has_ci: false,
+            test_framework: None,
+            linter: None,
+        };
+
+        let result = check_logging(temp.path(), &info).await;
+        assert!(result.score > 0.5);
+        assert!(result.suggestions.is_empty());
+    }
+
+    #[tokio::test]
+    async fn test_check_logging_rust_with_println() {
+        let temp = tempdir().unwrap();
+        let src_dir = temp.path().join("src");
+        fs::create_dir(&src_dir).await.unwrap();
+        let main_rs = src_dir.join("main.rs");
+        fs::write(&main_rs, "fn main() { println!(\"test\"); }").await.unwrap();
+
+        let info = ProjectInfo {
+            lang: ProjectLang::Rust,
+            has_tests: false,
+            has_linter: false,
+            has_formatter: false,
+            has_logging: false,
+            has_readme: false,
+            has_ci: false,
+            test_framework: None,
+            linter: None,
+        };
+
+        let result = check_logging(temp.path(), &info).await;
+        assert!(result.score < 0.5);
+        assert!(!result.suggestions.is_empty());
+        assert!(result.suggestions.iter().any(|s| s.contains("println!")));
+    }
+
+    #[tokio::test]
+    async fn test_check_logging_rust_both() {
+        let temp = tempdir().unwrap();
+        let src_dir = temp.path().join("src");
+        fs::create_dir(&src_dir).await.unwrap();
+        let main_rs = src_dir.join("main.rs");
+        fs::write(&main_rs, "use tracing::info;\nfn main() { info!(\"test\"); println!(\"debug\"); }").await.unwrap();
+
+        let info = ProjectInfo {
+            lang: ProjectLang::Rust,
+            has_tests: false,
+            has_linter: false,
+            has_formatter: false,
+            has_logging: false,
+            has_readme: false,
+            has_ci: false,
+            test_framework: None,
+            linter: None,
+        };
+
+        let result = check_logging(temp.path(), &info).await;
+        assert!(result.score > 0.0 && result.score < 1.0);
+        assert!(result.suggestions.iter().any(|s| s.contains("println!")));
+    }
+
+    #[tokio::test]
+    async fn test_check_logging_rust_neither() {
+        let temp = tempdir().unwrap();
+        let src_dir = temp.path().join("src");
+        fs::create_dir(&src_dir).await.unwrap();
+        let main_rs = src_dir.join("main.rs");
+        fs::write(&main_rs, "fn main() {}").await.unwrap();
+
+        let info = ProjectInfo {
+            lang: ProjectLang::Rust,
+            has_tests: false,
+            has_linter: false,
+            has_formatter: false,
+            has_logging: false,
+            has_readme: false,
+            has_ci: false,
+            test_framework: None,
+            linter: None,
+        };
+
+        let result = check_logging(temp.path(), &info).await;
+        assert_eq!(result.score, 0.3);
+    }
+
+    #[tokio::test]
+    async fn test_check_logging_js_with_winston() {
+        let temp = tempdir().unwrap();
+        let index_js = temp.path().join("index.js");
+        fs::write(&index_js, "console.log('test');").await.unwrap();
+
+        let info = ProjectInfo {
+            lang: ProjectLang::JavaScript,
+            has_tests: false,
+            has_linter: false,
+            has_formatter: false,
+            has_logging: false,
+            has_readme: false,
+            has_ci: false,
+            test_framework: None,
+            linter: None,
+        };
+
+        let result = check_logging(temp.path(), &info).await;
+        assert!(!result.suggestions.is_empty());
+        assert!(result.suggestions.iter().any(|s| s.contains("structured logger")));
+    }
+
+    #[tokio::test]
+    async fn test_check_logging_python_with_logging_module() {
+        let temp = tempdir().unwrap();
+        let main_py = temp.path().join("main.py");
+        fs::write(&main_py, "import logging\nlogging.info('test')").await.unwrap();
+
+        let info = ProjectInfo {
+            lang: ProjectLang::Python,
+            has_tests: false,
+            has_linter: false,
+            has_formatter: false,
+            has_logging: false,
+            has_readme: false,
+            has_ci: false,
+            test_framework: None,
+            linter: None,
+        };
+
+        let result = check_logging(temp.path(), &info).await;
+        assert!(result.score > 0.5);
+    }
+
+    #[tokio::test]
+    async fn test_check_logging_unknown_language() {
+        let temp = tempdir().unwrap();
+
+        let info = ProjectInfo {
+            lang: ProjectLang::Unknown,
+            has_tests: false,
+            has_linter: false,
+            has_formatter: false,
+            has_logging: false,
+            has_readme: false,
+            has_ci: false,
+            test_framework: None,
+            linter: None,
+        };
+
+        let result = check_logging(temp.path(), &info).await;
+        assert_eq!(result.score, 0.3);
+    }
+}

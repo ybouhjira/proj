@@ -205,3 +205,72 @@ fn count_files_with_pattern<'a>(
         count
     })
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::checks::detector::{ProjectInfo, ProjectLang};
+    use tempfile::tempdir;
+
+    #[tokio::test]
+    async fn test_check_testing_no_tests() {
+        let temp = tempdir().unwrap();
+
+        let info = ProjectInfo {
+            lang: ProjectLang::Rust,
+            has_tests: false,
+            has_linter: false,
+            has_formatter: false,
+            has_logging: false,
+            has_readme: false,
+            has_ci: false,
+            test_framework: None,
+            linter: None,
+        };
+
+        let result = check_testing(temp.path(), &info).await;
+        assert_eq!(result.score, 0.0);
+        assert!(!result.suggestions.is_empty());
+        assert!(result.suggestions.iter().any(|s| s.contains("No test framework")));
+    }
+
+    #[tokio::test]
+    async fn test_check_testing_with_framework() {
+        let temp = tempdir().unwrap();
+
+        let info = ProjectInfo {
+            lang: ProjectLang::JavaScript,
+            has_tests: true,
+            has_linter: false,
+            has_formatter: false,
+            has_logging: false,
+            has_readme: false,
+            has_ci: false,
+            test_framework: Some("jest".to_string()),
+            linter: None,
+        };
+
+        let result = check_testing(temp.path(), &info).await;
+        assert!(result.score >= 0.7);
+    }
+
+    #[tokio::test]
+    async fn test_check_testing_unknown_lang() {
+        let temp = tempdir().unwrap();
+
+        let info = ProjectInfo {
+            lang: ProjectLang::Unknown,
+            has_tests: false,
+            has_linter: false,
+            has_formatter: false,
+            has_logging: false,
+            has_readme: false,
+            has_ci: false,
+            test_framework: None,
+            linter: None,
+        };
+
+        let result = check_testing(temp.path(), &info).await;
+        assert_eq!(result.score, 0.0);
+    }
+}

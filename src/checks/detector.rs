@@ -326,3 +326,135 @@ fn check_pattern_in_dir<'a>(
         false
     })
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use tempfile::tempdir;
+    use tokio::fs;
+
+    #[tokio::test]
+    async fn test_detect_language_by_cargo_toml() {
+        let temp = tempdir().unwrap();
+        let cargo_toml = temp.path().join("Cargo.toml");
+        fs::write(&cargo_toml, "[package]\nname = \"test\"").await.unwrap();
+
+        let lang = detect_language(temp.path()).await;
+        assert_eq!(lang, ProjectLang::Rust);
+    }
+
+    #[tokio::test]
+    async fn test_detect_language_by_package_json() {
+        let temp = tempdir().unwrap();
+        let package_json = temp.path().join("package.json");
+        fs::write(&package_json, "{}").await.unwrap();
+
+        let lang = detect_language(temp.path()).await;
+        assert_eq!(lang, ProjectLang::JavaScript);
+    }
+
+    #[tokio::test]
+    async fn test_detect_language_by_tsconfig() {
+        let temp = tempdir().unwrap();
+        let package_json = temp.path().join("package.json");
+        let tsconfig = temp.path().join("tsconfig.json");
+        fs::write(&package_json, "{}").await.unwrap();
+        fs::write(&tsconfig, "{}").await.unwrap();
+
+        let lang = detect_language(temp.path()).await;
+        assert_eq!(lang, ProjectLang::TypeScript);
+    }
+
+    #[tokio::test]
+    async fn test_detect_language_by_pyproject() {
+        let temp = tempdir().unwrap();
+        let pyproject = temp.path().join("pyproject.toml");
+        fs::write(&pyproject, "[project]\nname = \"test\"").await.unwrap();
+
+        let lang = detect_language(temp.path()).await;
+        assert_eq!(lang, ProjectLang::Python);
+    }
+
+    #[tokio::test]
+    async fn test_detect_language_by_requirements() {
+        let temp = tempdir().unwrap();
+        let requirements = temp.path().join("requirements.txt");
+        fs::write(&requirements, "pytest\n").await.unwrap();
+
+        let lang = detect_language(temp.path()).await;
+        assert_eq!(lang, ProjectLang::Python);
+    }
+
+    #[tokio::test]
+    async fn test_detect_language_by_go_mod() {
+        let temp = tempdir().unwrap();
+        let go_mod = temp.path().join("go.mod");
+        fs::write(&go_mod, "module test\n").await.unwrap();
+
+        let lang = detect_language(temp.path()).await;
+        assert_eq!(lang, ProjectLang::Go);
+    }
+
+    #[tokio::test]
+    async fn test_detect_language_unknown() {
+        let temp = tempdir().unwrap();
+        let lang = detect_language(temp.path()).await;
+        assert_eq!(lang, ProjectLang::Unknown);
+    }
+
+    #[tokio::test]
+    async fn test_project_info_rust_with_tests() {
+        let temp = tempdir().unwrap();
+        let cargo_toml = temp.path().join("Cargo.toml");
+        fs::write(&cargo_toml, "[package]\nname = \"test\"").await.unwrap();
+
+        let src_dir = temp.path().join("src");
+        fs::create_dir(&src_dir).await.unwrap();
+        let lib_rs = src_dir.join("lib.rs");
+        fs::write(&lib_rs, "#[test]\nfn test_example() {}\n").await.unwrap();
+
+        let info = detect_project(temp.path()).await.unwrap();
+        assert_eq!(info.lang, ProjectLang::Rust);
+        assert!(info.has_tests);
+    }
+
+    #[tokio::test]
+    async fn test_project_info_has_readme() {
+        let temp = tempdir().unwrap();
+        let cargo_toml = temp.path().join("Cargo.toml");
+        fs::write(&cargo_toml, "[package]\nname = \"test\"").await.unwrap();
+
+        let readme = temp.path().join("README.md");
+        fs::write(&readme, "# Test Project\n").await.unwrap();
+
+        let info = detect_project(temp.path()).await.unwrap();
+        assert!(info.has_readme);
+    }
+
+    #[tokio::test]
+    async fn test_project_info_has_ci() {
+        let temp = tempdir().unwrap();
+        let cargo_toml = temp.path().join("Cargo.toml");
+        fs::write(&cargo_toml, "[package]\nname = \"test\"").await.unwrap();
+
+        let github_dir = temp.path().join(".github");
+        fs::create_dir(&github_dir).await.unwrap();
+        let workflows_dir = github_dir.join("workflows");
+        fs::create_dir(&workflows_dir).await.unwrap();
+        let ci_yml = workflows_dir.join("ci.yml");
+        fs::write(&ci_yml, "name: CI\n").await.unwrap();
+
+        let info = detect_project(temp.path()).await.unwrap();
+        assert!(info.has_ci);
+    }
+
+    #[test]
+    fn test_project_lang_display() {
+        assert_eq!(ProjectLang::Rust.to_string(), "Rust");
+        assert_eq!(ProjectLang::JavaScript.to_string(), "JavaScript");
+        assert_eq!(ProjectLang::TypeScript.to_string(), "TypeScript");
+        assert_eq!(ProjectLang::Python.to_string(), "Python");
+        assert_eq!(ProjectLang::Go.to_string(), "Go");
+        assert_eq!(ProjectLang::Unknown.to_string(), "Unknown");
+    }
+}

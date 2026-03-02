@@ -13,7 +13,10 @@ mod discovery;
 mod fuzzy;
 mod github;
 mod project;
+mod stats;
+mod tags;
 mod ui;
+mod watch;
 
 use cli::{Cli, Commands};
 
