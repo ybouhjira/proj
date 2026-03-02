@@ -9,8 +9,9 @@ AI/ML workflows, and infrastructure automation.
 .SH CLI TOOLS (RUST)
 .TP
 .B proj
-Project manager with local and GitHub synchronization, fuzzy search, and code
-quality checks. Provides seamless navigation between projects and repositories.
+Claude Code-first project manager with local and GitHub synchronization, interactive
+fuzzy picker, and AI-powered code quality checks. Opens projects directly in Claude
+Code with auto-cloning of remote repositories.
 .br
 .I Location:
 ~/Projects/claude-project-cli
@@ -247,6 +248,9 @@ Zsh plugin for Claude Code integration
 .I ~/Projects/
 Root directory for all development projects
 .SH ENVIRONMENT VARIABLES
+.TP
+.B PROJ_LOG
+Debug logging level for proj CLI (trace, debug, info, warn, error)
 .TP
 .B SUPERVISOR_THRESHOLD
 Confidence threshold for Claude Code supervisor hook (default: 90)

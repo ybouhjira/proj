@@ -13,7 +13,7 @@ proj \- manage all your projects from the terminal
 [\fIOPTIONS\fR]
 .SH DESCRIPTION
 .B proj
-is a fast CLI for managing all your projects across local directories and GitHub. It provides instant project switching via fuzzy search, unified sync status tracking, quality checks, and seamless GitHub integration.
+is a Claude Code-first project manager for navigating and managing all your projects across local directories and GitHub. It provides instant project switching via fuzzy search, unified sync status tracking, quality checks, and seamless GitHub integration.
 .PP
 Key capabilities:
 .IP \(bu 2
@@ -26,6 +26,8 @@ Smart sync tracking (dirty, ahead, behind, diverged)
 AI-powered code quality checks
 .IP \(bu 2
 GitHub integration (clone, create, browse)
+.IP \(bu 2
+Claude Code integration for seamless project opening
 .IP \(bu 2
 Shell integration for instant directory changes
 .IP \(bu 2
@@ -56,11 +58,11 @@ proj ls --remote
 .RE
 .TP
 .B cd \fI[QUERY]\fR
-Print path to project for shell wrapper (uses fuzzy search)
+Print path to project for shell wrapper (uses fuzzy search with type-to-filter picker)
 .RS
 .TP
 .I QUERY
-Project name or fuzzy query. If omitted, shows an interactive picker.
+Project name or fuzzy query. If omitted, shows an interactive FuzzySelect picker with type-to-filter.
 .PP
 Note: This command outputs a path. The shell wrapper function (see
 .B SHELL INTEGRATION
@@ -71,7 +73,7 @@ below) captures this and performs the actual directory change.
 .nf
 proj cd faceswap-api
 proj cd face           # Fuzzy matches faceswap-api
-proj cd                # Interactive picker
+proj cd                # Interactive FuzzySelect picker
 .fi
 .RE
 .RE
@@ -96,7 +98,7 @@ proj clone solid       # Fuzzy matches solidkit
 .RE
 .TP
 .B new \fINAME\fR [\fIOPTIONS\fR]
-Create new project (directory + git + GitHub repo)
+Create new project and launch Claude Code
 .RS
 .TP
 .I NAME
@@ -118,6 +120,8 @@ Git repository (with initial commit)
 GitHub repository (private by default)
 .IP \(bu 2
 Language-specific scaffolding (if --lang specified)
+.IP \(bu 2
+Automatically launches Claude Code in the new project directory
 .PP
 .B Examples:
 .RS 2
@@ -150,12 +154,12 @@ proj sync
 .RE
 .RE
 .TP
-.B open \fINAME\fR [\fIOPTIONS\fR]
-Open project in editor, browser, or file manager
+.B open [\fINAME\fR] [\fIOPTIONS\fR]
+Open project in Claude Code, browser, or file manager
 .RS
 .TP
 .I NAME
-Project name (supports fuzzy matching)
+Project name (optional, supports fuzzy matching). If omitted, shows an interactive FuzzySelect picker with all local and remote projects.
 .TP
 .B \-\-github
 Open GitHub repository URL in browser
@@ -163,14 +167,13 @@ Open GitHub repository URL in browser
 .B \-\-dir
 Open project directory in file manager
 .PP
-Default behavior (no flags): Opens project in your configured editor (via
-.B $EDITOR
-environment variable or config file).
+Default behavior (no flags): Opens project in Claude Code. For remote-only projects (not yet cloned), automatically clones the repository after confirmation.
 .PP
 .B Examples:
 .RS 2
 .nf
-proj open solidkit                # Opens in editor
+proj open                         # Interactive picker
+proj open solidkit                # Opens in Claude Code
 proj open solidkit --github       # Opens GitHub page
 proj open solidkit --dir          # Opens in file manager
 .fi
@@ -287,25 +290,13 @@ reads configuration from
 Example configuration:
 .RS 4
 .nf
-# Directory containing local projects
 projects_dir = "~/Projects"
+github_user = "ybouhjira"
+show_private = true
 
-# GitHub username for repository listing
-github_username = "yourusername"
-
-# Patterns to exclude from project discovery
-exclude_patterns = [
-    "node_modules",
-    "target",
-    ".git",
-    "vendor"
-]
-
-# Custom quality checks
 [checks]
-rust = ["cargo clippy", "cargo test"]
-typescript = ["npm run lint", "npm test"]
-python = ["ruff check", "pytest"]
+provider = "claude"
+checks = ["quality", "logging", "testing", "security"]
 .fi
 .RE
 .PP
@@ -314,11 +305,11 @@ All fields are optional. Defaults:
 .B projects_dir
 \- ~/Projects
 .IP \(bu 2
-.B github_username
+.B github_user
 \- Detected from git config
 .IP \(bu 2
-.B exclude_patterns
-\- node_modules, target, .git
+.B show_private
+\- true
 .SH SHELL INTEGRATION
 .B proj cd
 cannot change the parent shell's directory directly. Instead, it outputs the target path and relies on a shell wrapper function to perform the actual directory change.
@@ -389,11 +380,14 @@ Wrapper uses built-in
 to change directory
 .SH ENVIRONMENT
 .TP
-.B EDITOR
-Default editor for
-.BR "proj open" .
-If not set, falls back to config file or
-.BR vi .
+.B PROJ_LOG
+Control debug logging output. Set to
+.B debug
+for detailed output,
+.B info
+for high-level operations, or
+.B trace
+for maximum verbosity. Default: off (no logging output).
 .TP
 .B GITHUB_TOKEN
 GitHub personal access token. If not set,
@@ -453,10 +447,11 @@ proj new open-source-lib --lang js --public
 proj sync
 .fi
 .RE
-.SS Open a project in your editor
+.SS Open a project in Claude Code
 .RS 4
 .nf
-proj open faceswap-api
+proj open                    # Interactive picker
+proj open faceswap-api       # Direct open
 .fi
 .RE
 .SS Open a project's GitHub page
