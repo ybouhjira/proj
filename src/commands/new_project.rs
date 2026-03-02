@@ -1,11 +1,13 @@
 use anyhow::{Context, Result};
 use console::style;
 use tokio::process::Command;
+use tracing::{debug, info};
 
 use crate::config::Config;
 use crate::github;
 
 pub async fn execute(name: &str, public: bool, lang: Option<String>) -> Result<()> {
+    info!(name = %name, public = %public, "Creating new project");
     let config = Config::load()?;
     let projects_dir = config.projects_dir_expanded();
     let project_path = projects_dir.join(name);
@@ -21,6 +23,7 @@ pub async fn execute(name: &str, public: bool, lang: Option<String>) -> Result<(
     );
 
     std::fs::create_dir_all(&project_path).context("Failed to create project directory")?;
+    debug!("Directory created");
 
     println!("  {} Created directory", style("✓").green());
 
@@ -34,6 +37,7 @@ pub async fn execute(name: &str, public: bool, lang: Option<String>) -> Result<(
     if !git_init.status.success() {
         anyhow::bail!("git init failed");
     }
+    debug!("Git initialized");
 
     println!("  {} Initialized git repository", style("✓").green());
 
@@ -51,6 +55,7 @@ pub async fn execute(name: &str, public: bool, lang: Option<String>) -> Result<(
     github::create_repo(name, !public)
         .await
         .context("Failed to create GitHub repository")?;
+    debug!("GitHub repo created");
 
     println!(
         "  {} Created GitHub repository ({})",
@@ -72,24 +77,21 @@ pub async fn execute(name: &str, public: bool, lang: Option<String>) -> Result<(
             style("⚠").yellow()
         );
     } else {
+        debug!("Remote added");
         println!("  {} Added git remote", style("✓").green());
     }
 
     println!();
     println!(
-        "{} Project '{}' created at {}",
+        "  {} Project {} created at {}",
         style("✓").green().bold(),
-        style(name).bold(),
-        style(project_path.display()).cyan()
+        style(name).cyan().bold(),
+        style(project_path.display()).dim()
     );
     println!();
-    println!("  Next steps:");
-    println!("    cd {}", project_path.display());
-    println!("    # ... create files ...");
-    println!("    git add .");
-    println!("    git commit -m \"Initial commit\"");
-    println!("    git push -u origin main");
-    println!();
+
+    // Auto-launch Claude Code in the new project
+    crate::ui::launch_claude(&project_path)?;
 
     Ok(())
 }

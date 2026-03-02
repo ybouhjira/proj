@@ -1,6 +1,6 @@
 # proj
 
-**Fast CLI for managing all your projects — local + GitHub sync, fuzzy search, instant navigation**
+**Fast CLI for managing all your projects — local + GitHub sync, fuzzy search, instant navigation, seamless Claude Code integration**
 
 [![Crates.io](https://img.shields.io/crates/v/proj?style=flat-square)](https://crates.io/crates/proj)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
@@ -14,8 +14,9 @@ Managing dozens of projects is chaotic:
 - **Navigation is slow** — `cd ~/Projects/that-repo-from-3-months-ago` gets tedious
 - **Sync status is unclear** — Which repos need pushing? Which have uncommitted changes?
 - **Context switching kills flow** — Every directory change breaks your mental model
+- **Opening projects manually is tedious** — Launching editors, navigating to repos
 
-`proj` solves this with a unified dashboard, instant fuzzy navigation, and smart sync tracking.
+`proj` solves this with a unified dashboard, instant fuzzy navigation, smart sync tracking, and seamless Claude Code integration. Built as a Claude Code-first project manager — create, navigate, and open projects in Claude Code with a single command.
 
 ## Demo
 
@@ -171,13 +172,19 @@ proj ls
 # Fuzzy search and jump to a project
 proj cd myproject
 
+# Open a project in Claude Code (interactive picker)
+proj open
+
+# Open a specific project in Claude Code
+proj open myproject
+
 # See what needs attention
 proj sync
 
 # Run quality checks
 proj check myproject
 
-# Create a new project (local + GitHub)
+# Create a new project (local + GitHub, auto-opens in Claude Code)
 proj new my-new-project
 
 # Generate shell completions
@@ -196,7 +203,9 @@ proj completions zsh > ~/.zsh/completions/_proj
 - 💾 **Response caching** — GitHub API responses cached locally (5min TTL)
 - 🛠️ **Shell integration** — `cd` wrapper for instant navigation
 - 📝 **Shell completions** — Tab completion for bash, zsh, fish, powershell
-- 🎨 **Interactive picker** — No args? Get a fuzzy-searchable project list
+- 🎨 **Interactive picker** — No args? Get a fuzzy-searchable project list with status indicators
+- 🤖 **Claude Code integration** — Launch Claude Code directly from the CLI, auto-open on project creation
+- 📦 **Remote project cloning** — Select remote-only projects in the picker to auto-clone them
 - 📖 **Man pages** — Full documentation via `man proj`
 
 ## Commands
@@ -204,11 +213,11 @@ proj completions zsh > ~/.zsh/completions/_proj
 | Command | Description | Key Flags |
 |---------|-------------|-----------|
 | `proj ls` | List all projects (local + remote) | `--local`, `--remote`, `--all`, `--sort <name\|push\|dirty\|status>`, `--refresh` |
-| `proj cd <query>` | Fuzzy search and jump to project | Interactive picker if no query |
+| `proj cd [query]` | Fuzzy search and jump to project | Interactive picker if no query |
 | `proj sync` | Show sync status dashboard | `--ai` for recommendations |
 | `proj clone <name>` | Clone a GitHub repo to projects dir | `--org <name>` for org repos |
-| `proj new <name>` | Create new project (local + GitHub) | `--public` (default: private) |
-| `proj open <name>` | Open project in browser/editor | `--github`, `--dir`, `--editor` |
+| `proj new <name>` | Create new project (local + GitHub), auto-open in Claude Code | `--public` (default: private) |
+| `proj open [name]` | Open project in Claude Code | Interactive picker if no name. Remote-only projects can be auto-cloned. `--github` to open on GitHub instead |
 | `proj info <name>` | Show detailed project information | `--json` for machine-readable output |
 | `proj check [name]` | Run quality checks (linters, tests) | `--all` to check all projects |
 | `proj completions <shell>` | Generate shell completions | `bash`, `zsh`, `fish`, `powershell` |
@@ -225,10 +234,22 @@ proj ls --remote --refresh
 # Jump to a project (fuzzy search)
 proj cd voice
 
-# Create a new public GitHub repository
+# Open interactive picker to select and navigate to a project
+proj cd
+
+# Open interactive picker and launch a project in Claude Code
+proj open
+
+# Open a specific project in Claude Code
+proj open faceswap-api
+
+# Create a new private GitHub repository and open it in Claude Code
+proj new my-awesome-tool
+
+# Create a new public GitHub repository and open it in Claude Code
 proj new my-awesome-tool --public
 
-# Open project on GitHub
+# Open project on GitHub in browser
 proj open faceswap-api --github
 
 # Run quality checks on all projects
@@ -382,6 +403,25 @@ end
 Completions are auto-loaded from `~/.config/fish/completions/proj.fish`.
 </details>
 
+## Debugging
+
+Enable debug logging with the `PROJ_LOG` environment variable:
+
+```bash
+# Detailed debug output
+PROJ_LOG=debug proj ls
+
+# High-level operations only
+PROJ_LOG=info proj open myapp
+
+# Very verbose trace output
+PROJ_LOG=trace proj cd face
+```
+
+Available log levels: `trace`, `debug`, `info`, `warn`, `error`
+
+This is useful for troubleshooting project discovery, GitHub API calls, fuzzy matching, and Claude Code launching.
+
 ## Comparison
 
 | Feature | proj | ghq | gita | mani |
@@ -394,11 +434,13 @@ Completions are auto-loaded from `~/.config/fish/completions/proj.fish`.
 | Sync dashboard | ✅ | ❌ | ⚠️ (basic) | ❌ |
 | Response caching | ✅ | ❌ | ❌ | ❌ |
 | Interactive picker | ✅ | ❌ | ❌ | ❌ |
+| Claude Code integration | ✅ | ❌ | ❌ | ❌ |
+| Auto-clone remote repos | ✅ | ❌ | ❌ | ❌ |
 | Shell completions | ✅ | ⚠️ (limited) | ❌ | ❌ |
 | Written in Rust | ✅ | ✅ | ❌ (Python) | ❌ (Go) |
 | Shell CD integration | ✅ | ✅ | ❌ | ❌ |
 
-`proj` combines the best of all worlds: fast like `ghq`, smart like `gita`, and GitHub-native.
+`proj` combines the best of all worlds: fast like `ghq`, smart like `gita`, GitHub-native, and optimized for Claude Code workflows.
 
 ## Configuration
 
@@ -475,7 +517,7 @@ Contributions welcome! Here's how:
 cargo test
 
 # Run with debug output
-RUST_LOG=debug cargo run -- ls --local
+PROJ_LOG=debug cargo run -- ls --local
 
 # Build release binary
 cargo build --release

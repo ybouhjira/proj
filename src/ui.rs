@@ -1,3 +1,4 @@
+use anyhow::Result;
 use chrono::{DateTime, Duration, Utc};
 use console::{style, Style};
 use std::collections::HashMap;
@@ -6,7 +7,80 @@ use tabled::{
     settings::{object::Rows, Alignment, Modify, Style as TableStyle},
 };
 
+#[cfg(not(unix))]
+use anyhow::Context;
+
 use crate::project::{Project, SyncStatus};
+
+pub fn print_banner() {
+    println!();
+    println!(
+        "  {} {} {}",
+        style("┃").cyan().bold(),
+        style("proj").bold().cyan(),
+        style("— project manager for Claude Code").dim()
+    );
+    println!("  {}", style("┃").cyan().bold());
+}
+
+pub fn print_section(emoji: &str, title: &str) {
+    println!();
+    println!(
+        "  {} {}",
+        style(emoji).bold(),
+        style(title).bold()
+    );
+    println!(
+        "  {}",
+        style("─".repeat(40)).dim()
+    );
+}
+
+pub fn print_success(msg: &str) {
+    println!(
+        "  {} {}",
+        style("✓").green().bold(),
+        msg
+    );
+}
+
+pub fn print_step(msg: &str) {
+    println!(
+        "  {} {}",
+        style("→").cyan(),
+        msg
+    );
+}
+
+pub fn launch_claude(path: &std::path::Path) -> Result<()> {
+    println!(
+        "\n  {} Launching {} in {}\n",
+        style("🚀").bold(),
+        style("Claude Code").cyan().bold(),
+        style(path.display()).dim()
+    );
+
+    #[cfg(unix)]
+    {
+        use std::os::unix::process::CommandExt;
+        let err = std::process::Command::new("claude")
+            .current_dir(path)
+            .exec();
+        anyhow::bail!("Failed to launch Claude Code: {}", err);
+    }
+
+    #[cfg(not(unix))]
+    {
+        let status = std::process::Command::new("claude")
+            .current_dir(path)
+            .status()
+            .context("Failed to launch Claude Code")?;
+        if !status.success() {
+            anyhow::bail!("Claude Code exited with error");
+        }
+        Ok(())
+    }
+}
 
 pub fn print_project_table(projects: &[Project], show_remote: bool, cache_status: Option<&str>) {
     let local_count = projects.iter().filter(|p| p.local_path.is_some()).count();
@@ -238,7 +312,7 @@ pub fn format_relative_time(dt: &DateTime<Utc>) -> String {
     }
 }
 
-fn format_status(status: &SyncStatus) -> String {
+pub(crate) fn format_status(status: &SyncStatus) -> String {
     match status {
         SyncStatus::Synced => {
             format!("{} {}", "✅", style("synced").green())
@@ -261,5 +335,124 @@ fn format_status(status: &SyncStatus) -> String {
         SyncStatus::NoGit => {
             format!("{} {}", "📁", style("no-git").dim())
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_format_relative_time_just_now() {
+        let now = Utc::now();
+        let result = format_relative_time(&now);
+        assert!(result.contains("just now"));
+    }
+
+    #[test]
+    fn test_format_relative_time_seconds() {
+        let time = Utc::now() - Duration::seconds(30);
+        let result = format_relative_time(&time);
+        assert!(result.contains("just now"));
+    }
+
+    #[test]
+    fn test_format_relative_time_minutes() {
+        let time = Utc::now() - Duration::minutes(5);
+        let result = format_relative_time(&time);
+        assert!(result.contains("5m ago"));
+    }
+
+    #[test]
+    fn test_format_relative_time_hours() {
+        let time = Utc::now() - Duration::hours(3);
+        let result = format_relative_time(&time);
+        assert!(result.contains("3h ago"));
+    }
+
+    #[test]
+    fn test_format_relative_time_days() {
+        let time = Utc::now() - Duration::days(2);
+        let result = format_relative_time(&time);
+        assert!(result.contains("2d ago"));
+    }
+
+    #[test]
+    fn test_format_relative_time_weeks() {
+        let time = Utc::now() - Duration::weeks(2);
+        let result = format_relative_time(&time);
+        assert!(result.contains("2w ago"));
+    }
+
+    #[test]
+    fn test_format_relative_time_months() {
+        let time = Utc::now() - Duration::days(60);
+        let result = format_relative_time(&time);
+        assert!(result.contains("mo ago"));
+    }
+
+    #[test]
+    fn test_format_relative_time_years() {
+        let time = Utc::now() - Duration::days(400);
+        let result = format_relative_time(&time);
+        assert!(result.contains("y ago"));
+    }
+
+    #[test]
+    fn test_format_relative_time_negative_duration() {
+        let future = Utc::now() + Duration::hours(1);
+        let result = format_relative_time(&future);
+        assert!(result.contains("just now"));
+    }
+
+    #[test]
+    fn test_format_status_synced() {
+        let status = format_status(&SyncStatus::Synced);
+        assert!(status.contains("synced"));
+        assert!(status.contains("✅"));
+    }
+
+    #[test]
+    fn test_format_status_ahead() {
+        let status = format_status(&SyncStatus::LocalAhead(3));
+        assert!(status.contains("ahead"));
+        assert!(status.contains("3"));
+        assert!(status.contains("⬆"));
+    }
+
+    #[test]
+    fn test_format_status_behind() {
+        let status = format_status(&SyncStatus::RemoteBehind(5));
+        assert!(status.contains("behind"));
+        assert!(status.contains("5"));
+        assert!(status.contains("⬇"));
+    }
+
+    #[test]
+    fn test_format_status_diverged() {
+        let status = format_status(&SyncStatus::Diverged);
+        assert!(status.contains("diverged"));
+        assert!(status.contains("⚠"));
+    }
+
+    #[test]
+    fn test_format_status_local_only() {
+        let status = format_status(&SyncStatus::LocalOnly);
+        assert!(status.contains("local"));
+        assert!(status.contains("💻"));
+    }
+
+    #[test]
+    fn test_format_status_remote_only() {
+        let status = format_status(&SyncStatus::RemoteOnly);
+        assert!(status.contains("remote"));
+        assert!(status.contains("☁️"));
+    }
+
+    #[test]
+    fn test_format_status_no_git() {
+        let status = format_status(&SyncStatus::NoGit);
+        assert!(status.contains("no-git"));
+        assert!(status.contains("📁"));
     }
 }

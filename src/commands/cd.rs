@@ -1,12 +1,14 @@
 use anyhow::{Context, Result};
 use console::style;
-use dialoguer::{theme::ColorfulTheme, Select};
+use dialoguer::{theme::ColorfulTheme, FuzzySelect};
+use tracing::debug;
 
 use crate::config::Config;
 use crate::discovery;
 use crate::fuzzy;
 
 pub async fn execute(query: Option<&str>) -> Result<()> {
+    debug!(query = ?query, "CD command");
     let config = Config::load()?;
     let projects_dir = config.projects_dir_expanded();
 
@@ -24,10 +26,11 @@ pub async fn execute(query: Option<&str>) -> Result<()> {
 
     // If no query provided, show interactive picker with all projects
     if query.is_none() {
-        let selection = Select::with_theme(&ColorfulTheme::default())
+        let selection = FuzzySelect::with_theme(&ColorfulTheme::default())
             .with_prompt("Select project")
             .items(&local_names)
             .default(0)
+            .highlight_matches(true)
             .interact_opt()?;
 
         if let Some(index) = selection {
@@ -72,10 +75,11 @@ pub async fn execute(query: Option<&str>) -> Result<()> {
     // Multiple ambiguous matches - show interactive picker
     let match_names: Vec<String> = matches.iter().map(|(name, _)| name.clone()).collect();
 
-    let selection = Select::with_theme(&ColorfulTheme::default())
+    let selection = FuzzySelect::with_theme(&ColorfulTheme::default())
         .with_prompt("Select project")
         .items(&match_names)
         .default(0)
+        .highlight_matches(true)
         .interact_opt()?;
 
     if let Some(index) = selection {

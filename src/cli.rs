@@ -61,10 +61,10 @@ pub enum Commands {
     #[command(about = "Show sync status dashboard")]
     Sync,
 
-    #[command(about = "Open project in editor or browser")]
+    #[command(about = "Open project in Claude Code")]
     Open {
-        #[arg(help = "Project name (fuzzy match)")]
-        name: String,
+        #[arg(help = "Project name (fuzzy match, omit for interactive picker)")]
+        name: Option<String>,
 
         #[arg(long, help = "Open GitHub URL in browser")]
         github: bool,

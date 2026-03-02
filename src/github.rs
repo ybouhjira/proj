@@ -2,6 +2,7 @@ use anyhow::{Context, Result};
 use chrono::{DateTime, Utc};
 use serde::Deserialize;
 use tokio::process::Command;
+use tracing::debug;
 
 use crate::project::GitHubRepo;
 
@@ -35,11 +36,13 @@ struct Language {
 }
 
 pub async fn check_gh_cli() -> Result<()> {
+    debug!("Checking for gh CLI");
     which::which("gh").context("gh CLI not found. Install it: https://cli.github.com")?;
     Ok(())
 }
 
 pub async fn list_repos(username: &str) -> Result<Vec<GitHubRepo>> {
+    debug!(user = %username, "Fetching repos from GitHub");
     let output = Command::new("gh")
         .args([
             "repo",
@@ -81,6 +84,7 @@ pub async fn list_repos(username: &str) -> Result<Vec<GitHubRepo>> {
 }
 
 pub async fn create_repo(name: &str, private: bool) -> Result<()> {
+    debug!(name = %name, private = %private, "Creating GitHub repo");
     let mut args = vec!["repo", "create", name];
 
     if private {

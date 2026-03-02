@@ -2,6 +2,7 @@
 
 use anyhow::Result;
 use clap::Parser;
+use tracing_subscriber::EnvFilter;
 
 mod cache;
 mod checks;
@@ -18,6 +19,15 @@ use cli::{Cli, Commands};
 
 #[tokio::main]
 async fn main() -> Result<()> {
+    tracing_subscriber::fmt()
+        .with_env_filter(
+            EnvFilter::try_from_env("PROJ_LOG")
+                .unwrap_or_else(|_| EnvFilter::new("off"))
+        )
+        .with_target(false)
+        .with_timer(tracing_subscriber::fmt::time::uptime())
+        .init();
+
     github::check_gh_cli().await?;
 
     let cli = Cli::parse();
@@ -45,7 +55,7 @@ async fn main() -> Result<()> {
             commands::sync::execute().await?;
         }
         Commands::Open { name, github, dir } => {
-            commands::open::execute(&name, github, dir).await?;
+            commands::open::execute(name.as_deref(), github, dir).await?;
         }
         Commands::Check {
             name,

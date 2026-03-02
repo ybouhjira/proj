@@ -3,6 +3,7 @@ use chrono::{DateTime, Utc};
 use std::collections::HashMap;
 use std::path::Path;
 use tokio::process::Command;
+use tracing::{debug, info};
 
 use crate::cache;
 use crate::config::Config;
@@ -10,6 +11,7 @@ use crate::github;
 use crate::project::{GitStatus, Project, SyncStatus};
 
 pub async fn discover_local(projects_dir: &Path) -> Result<Vec<Project>> {
+    info!(dir = %projects_dir.display(), "Discovering local projects");
     if !projects_dir.exists() {
         return Ok(Vec::new());
     }
@@ -46,10 +48,12 @@ pub async fn discover_local(projects_dir: &Path) -> Result<Vec<Project>> {
         }
     }
 
+    debug!(count = projects.len(), "Local projects found");
     Ok(projects)
 }
 
 pub async fn discover_remote(config: &Config) -> Result<Vec<Project>> {
+    info!("Discovering remote projects");
     // Try to get cached repos first
     let repos = if let Some(cached) = cache::get_cached_repos() {
         cached
@@ -65,6 +69,7 @@ pub async fn discover_remote(config: &Config) -> Result<Vec<Project>> {
         repos
     };
 
+    debug!(count = repos.len(), "Remote repos found");
     Ok(repos
         .into_iter()
         .map(|repo| {
@@ -86,6 +91,7 @@ pub async fn discover_remote(config: &Config) -> Result<Vec<Project>> {
 }
 
 pub async fn merge_projects(local: Vec<Project>, remote: Vec<Project>) -> Vec<Project> {
+    debug!(local = local.len(), remote = remote.len(), "Merging projects");
     let mut merged: HashMap<String, Project> = HashMap::new();
 
     for mut project in local {

@@ -1,4 +1,7 @@
 use anyhow::Result;
+use indicatif::{ProgressBar, ProgressStyle};
+use std::time::Duration;
+use tracing::debug;
 
 use crate::cache;
 use crate::config::Config;
@@ -13,6 +16,7 @@ pub async fn execute(
     sort: &str,
     refresh: bool,
 ) -> Result<()> {
+    debug!(remote = %remote, local = %local, all = %all, sort = %sort, "Listing projects");
     let config = Config::load()?;
     let projects_dir = config.projects_dir_expanded();
 
@@ -20,6 +24,17 @@ pub async fn execute(
     if refresh {
         cache::invalidate_cache()?;
     }
+
+    // Show spinner during discovery
+    let spinner = ProgressBar::new_spinner();
+    spinner.set_style(
+        ProgressStyle::default_spinner()
+            .tick_chars("⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏")
+            .template("{spinner:.cyan} {msg}")
+            .unwrap(),
+    );
+    spinner.set_message("Discovering projects...");
+    spinner.enable_steady_tick(Duration::from_millis(80));
 
     let local_projects = if !remote {
         discovery::discover_local(&projects_dir).await?
@@ -34,6 +49,8 @@ pub async fn execute(
     };
 
     let mut projects = discovery::merge_projects(local_projects, remote_projects).await;
+
+    spinner.finish_and_clear();
 
     // Sort projects based on the selected sort method
     match sort {
