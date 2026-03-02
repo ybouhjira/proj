@@ -168,7 +168,7 @@ pub async fn execute(name: Option<&str>, github: bool, dir: bool) -> Result<()> 
     // Default: Open in Claude Code
     if let Some(ref path) = project.local_path {
         info!(path = %path.display(), "Launching Claude Code");
-        crate::ui::launch_claude(path)?;
+        crate::ui::launch_claude(path, &config.claude.default_args)?;
     } else {
         // Remote-only project - offer to clone first
         println!(
@@ -218,7 +218,7 @@ pub async fn execute(name: Option<&str>, github: bool, dir: bool) -> Result<()> 
                 style(clone_path.display()).cyan()
             );
 
-            crate::ui::launch_claude(&clone_path)?;
+            crate::ui::launch_claude(&clone_path, &config.claude.default_args)?;
         }
     }
 

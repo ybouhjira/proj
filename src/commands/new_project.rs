@@ -91,7 +91,7 @@ pub async fn execute(name: &str, public: bool, lang: Option<String>) -> Result<(
     println!();
 
     // Auto-launch Claude Code in the new project
-    crate::ui::launch_claude(&project_path)?;
+    crate::ui::launch_claude(&project_path, &config.claude.default_args)?;
 
     Ok(())
 }

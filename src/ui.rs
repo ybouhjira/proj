@@ -52,7 +52,7 @@ pub fn print_step(msg: &str) {
     );
 }
 
-pub fn launch_claude(path: &std::path::Path) -> Result<()> {
+pub fn launch_claude(path: &std::path::Path, args: &[String]) -> Result<()> {
     println!(
         "\n  {} Launching {} in {}\n",
         style("🚀").bold(),
@@ -65,6 +65,7 @@ pub fn launch_claude(path: &std::path::Path) -> Result<()> {
         use std::os::unix::process::CommandExt;
         let err = std::process::Command::new("claude")
             .current_dir(path)
+            .args(args)
             .exec();
         anyhow::bail!("Failed to launch Claude Code: {}", err);
     }
@@ -73,6 +74,7 @@ pub fn launch_claude(path: &std::path::Path) -> Result<()> {
     {
         let status = std::process::Command::new("claude")
             .current_dir(path)
+            .args(args)
             .status()
             .context("Failed to launch Claude Code")?;
         if !status.success() {
